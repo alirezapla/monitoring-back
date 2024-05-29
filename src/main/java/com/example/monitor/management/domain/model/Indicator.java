@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.Set;
+
+import com.example.monitor.management.common.Dto.ComputationDto;
 
 @Setter
 @Getter
@@ -43,10 +45,42 @@ public class Indicator extends BaseModel<Indicator> {
     private UnitType unitType;
 
 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doc_table_id", nullable = false)
     private DocTable docTable;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "indicator",fetch=FetchType.LAZY)
-    private List<Computation> computation;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "indicator", fetch = FetchType.LAZY)
+    private Set<Computation> computation;
+
+
+    public Indicator() {
+    }
+
+    public Indicator(String id,
+                     String name,
+                     Integer order,
+                     String transaltionFa,
+                     String transaltionEn,
+                     String descriptionFa,
+                     String descriptionEn,
+                     DataType dataType,
+                     IndicatorType indicatorType,
+                     UnitType unitType
+    ) {
+        super(id);
+        this.name = name;
+        this.order = order;
+        this.transaltionFa = transaltionFa;
+        this.transaltionEn = transaltionEn;
+        this.descriptionFa = descriptionFa;
+        this.descriptionEn = descriptionEn;
+        this.dataType = dataType;
+        this.indicatorType = indicatorType;
+        this.unitType = unitType;
+
+    }
+
+    public void addComputation(ComputationDto computationDto) {
+        this.computation.add(new Computation(computationDto.getLabel(), computationDto.getDescription()));
+    }
 }

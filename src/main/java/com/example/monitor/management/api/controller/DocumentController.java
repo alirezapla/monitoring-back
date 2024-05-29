@@ -1,6 +1,7 @@
 package com.example.monitor.management.api.controller;
 
 
+import com.example.monitor.management.api.utils.httputil.pagination.PaginationDTO;
 import com.example.monitor.management.api.utils.httputil.response.SuccessfulRequestResponseEntity;
 import com.example.monitor.management.common.Dto.CreateBodyDto;
 import com.example.monitor.management.common.Dto.UpdateBodyDto;
@@ -27,17 +28,20 @@ public class DocumentController {
 
     @PostMapping()
     public ResponseEntity<Object> createDocuments(@Valid @RequestBody CreateBodyDto createBodyDto) throws Exception {
-        MyLogger.doLog(LogLevel.INFO, AppLogEvent.CREATE_REQUEST_RECEIVED, createBodyDto);
+//        MyLogger.doLog(LogLevel.INFO, AppLogEvent.CREATE_REQUEST_RECEIVED, createBodyDto);
         return responseHandler(documentService.create(createBodyDto), AppLogEvent.CREATE_RESPONSE_SENT);
     }
 
     @GetMapping(value = "/{docId}")
-    public ResponseEntity<Object> getDocuments(@PathVariable String docId,
-                                               @RequestParam(required = false) String searchTerm,
-                                               @RequestParam(required = true) String clientPerspective
+    public ResponseEntity<Object> getDocuments(
+            @RequestParam int page,
+            @RequestParam int perPage,
+            @PathVariable String docId,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = true) String clientPerspective
     ) throws Exception {
         MyLogger.doLog(LogLevel.INFO, AppLogEvent.FETCH_REQUEST_RECEIVED, docId);
-        return responseHandler(documentService.retrive(docId, searchTerm, clientPerspective),
+        return responseHandler(documentService.retrive(new PaginationDTO(page, perPage),docId, searchTerm, clientPerspective),
                 AppLogEvent.FETCH_RESPONSE_SENT);
 
     }
