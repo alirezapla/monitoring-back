@@ -88,9 +88,9 @@ public class IndicatorService {
                 indicatorDto.getTransaltionEn(),
                 indicatorDto.getDescriptionFa(),
                 indicatorDto.getDescriptionEn(),
-                DataType.valueOf(indicatorDto.getDataType()),
-                IndicatorType.valueOf(indicatorDto.getIndicatorType()),
-                UnitType.valueOf(indicatorDto.getUnitType()),
+                indicatorDto.getDataType(),
+                indicatorDto.getIndicatorType(),
+                indicatorDto.getUnitType(),
                 indicatorDto.getComputation(),
                 docTable
         );
@@ -105,9 +105,9 @@ public class IndicatorService {
         indicator.setTransaltionFa(updateIndicatorDto.getTransaltionFa());
         indicator.setDescriptionEn(updateIndicatorDto.getDescriptionEn());
         indicator.setDescriptionFa(updateIndicatorDto.getDescriptionFa());
-        indicator.setIndicatorType(IndicatorType.valueOf(updateIndicatorDto.getIndicatorType()));
-        indicator.setDataType(DataType.valueOf(updateIndicatorDto.getDataType()));
-        indicator.setUnitType(UnitType.valueOf(updateIndicatorDto.getUnitType()));
+        indicator.setIndicatorType(updateIndicatorDto.getIndicatorType());
+        indicator.setDataType(updateIndicatorDto.getDataType());
+        indicator.setUnitType(updateIndicatorDto.getUnitType());
         indicator.setComputation(updateIndicatorDto.getComputation());
         indicator.visible(updateIndicatorDto.isHided());
         return indicator;

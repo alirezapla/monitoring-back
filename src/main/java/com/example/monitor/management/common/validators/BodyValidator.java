@@ -1,4 +1,4 @@
-package com.example.monitor.management.common;
+package com.example.monitor.management.common.validators;
 
 import com.example.monitor.management.api.utils.httputil.response.BadRequestResponseEntity;
 import com.example.monitor.management.common.exceptions.BodyValidationException;

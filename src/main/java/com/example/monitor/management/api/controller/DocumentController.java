@@ -2,16 +2,13 @@ package com.example.monitor.management.api.controller;
 
 
 import com.example.monitor.management.api.responseentity.ResponseEntityUtil;
-import com.example.monitor.management.api.utils.httputil.pagination.PageDTO;
 import com.example.monitor.management.api.utils.httputil.pagination.PaginationDTO;
 import com.example.monitor.management.api.utils.httputil.response.SuccessfulRequestResponseEntity;
 import com.example.monitor.management.common.AppLogEvent;
-import com.example.monitor.management.common.BodyValidator;
+import com.example.monitor.management.common.validators.BodyValidator;
 import com.example.monitor.management.common.Dto.BodyDto;
 import com.example.monitor.management.common.MyLogger;
 import com.example.monitor.management.common.exceptions.BodyValidationException;
-import com.example.monitor.management.domain.model.Document;
-import com.example.monitor.management.domain.model.security.CustomUserDetails;
 import com.example.monitor.management.domain.service.DocumentService;
 import com.example.monitor.management.infrastructure.security.authentication.JwtAuthentication;
 import org.springframework.boot.logging.LogLevel;
@@ -23,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "document")
