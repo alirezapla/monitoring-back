@@ -13,7 +13,7 @@ import java.util.Set;
 @Setter
 public class IndicatorDto{
 
-    private String indicatorId;
+    private String id;
 //    @NotNull(message = "The name is required.")
     private String name;
 //    @NotNull(message = "The order is required.")

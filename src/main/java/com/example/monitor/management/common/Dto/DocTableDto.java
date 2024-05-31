@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 public class DocTableDto {
-    private String tableId;
+    private String id;
     //    @NotNull(message = "The name is required.")
     private String name;
     //    @Valid
