@@ -1,8 +1,7 @@
-
 app:
   jwt:
-    token-expiration-minutes: 120
-    secret-key: BMmbDWpwfa2rPaOuXHAiZQWnkuNzksiCFOjKhTwhenk
+    token-expiration-minutes: 60
+    secret-key: BMmbDWpwfa2rPaOuXHAiZQWnkuNzksiCFOjKhTSecyyRet
 
 com:
   monitoring:
@@ -14,6 +13,7 @@ server:
   port: 8877
 
 spring:
+
   application:
     name: monitoring-management
   servlet:
@@ -33,6 +33,7 @@ spring:
     show-sql: false
     open-in-view: false
     properties:
+
       hibernate.format_sql: true
       hibernate.jdbc.time_zone: UTC
       hibernate.id.new_generator_mappings: true
@@ -47,13 +48,16 @@ spring:
       hibernate.query.in_clause_parameter_padding: true
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: monitoring
 
     hibernate:
       ddl-auto: update
       naming:
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-    flyway:
+  flyway:
       baselineOnMigrate: true
       enabled: true
       schemas: monitoring
       default-schema: monitoring
+      locations: classpath:db.migration
+
