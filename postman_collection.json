@@ -1,0 +1,224 @@
+{
+	"info": {
+		"_postman_id": "604f2c6b-8a8e-4caf-89d0-253bb6f78ac1",
+		"name": "New Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13745811"
+	},
+	"item": [
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"first\",\n    \"description\": \"looooo\",\n    \"doc_tables\": [\n        {\n            \"name\": \"x\",\n            \"indicators\": [\n                {\n                    \"name\": \"y\",\n                    \"order\": 2,\n                    \"transaltionFa\": \"ss\",\n                    \"transaltionEn\": \"xxz\",\n                    \"descriptionFa\": \"tt\",\n                    \"descriptionEn\": \"vv\",\n                    \"dataType\": \"STRING\",\n                    \"indicatorType\": \"KPI\",\n                    \"unitType\": \"S\",\n                    \"computations\": [\n                        {\n                            \"label\": \"label1\",\n                            \"description\": \"1\"\n                        },\n                        {\n                            \"label\": \"label2\",\n                            \"description\": \"2\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"f\",\n                    \"order\": 3,\n                    \"transaltionFa\": \"ss1\",\n                    \"transaltionEn\": \"xxz1\",\n                    \"descriptionFa\": \"tt1\",\n                    \"descriptionEn\": \"vv1\",\n                    \"dataType\": \"STRING\",\n                    \"indicatorType\": \"KPI\",\n                    \"unitType\": \"S\",\n                    \"computations\": [\n                        {\n                            \"label\": \"label3\",\n                            \"description\": \"3\"\n                        }\n                    ]\n                }\n            ]\n        }\n    ],\n    \"computing_table\": [\n        {\n            \"description\": \"kkkk\",\n            \"command\": \"sdik\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8877/api/v1/document",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8877",
+					"path": [
+						"api",
+						"v1",
+						"document"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8877/api/v1/document/:docId?clientPerspective=View&page=1&perPage=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8877",
+					"path": [
+						"api",
+						"v1",
+						"document",
+						":docId"
+					],
+					"query": [
+						{
+							"key": "clientPerspective",
+							"value": "View"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "perPage",
+							"value": "10"
+						}
+					],
+					"variable": [
+						{
+							"key": "docId",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8877/api/v1/document?searchTerm=name&page=1&perPage=10",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8877",
+					"path": [
+						"api",
+						"v1",
+						"document",
+						":docId"
+					],
+					"query": [
+						{
+							"key": "searchTerm",
+							"value": "name"
+						},
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "perPage",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"first\",\n    \"description\": \"annn\",\n    \"doc_tables\": [\n        {\n            \"name\": \"adasdadx\",\n            \"id\": \"46c0ba75-7435-4c46-a699-c42d77b50f5c\",\n            \"indicators\": [\n                {\n                    \"id\": \"37c048cb-0a40-4f6e-9983-8cd6bb397b6c\",\n                    \"name\": \"f\",\n                    \"is_hided\": false,\n                    \"is_deleted\": false,\n                    \"record_order\": 3,\n                    \"transaltion_fa\": \"ss1\",\n                    \"transaltion_en\": \"xxz1\",\n                    \"description_fa\": \"tt1\",\n                    \"description_en\": \"vv1\",\n                    \"data_type\": \"STRING\",\n                    \"indicator_type\": \"KPI\",\n                    \"unit_type\": \"S\",\n                    \"computations\": [\n                        {\n                            \"label\": \"label3\",\n                            \"description\": \"3\"\n                        }\n                    ]\n                },\n                {\n                    \"id\": \"a52f0bbc-95fe-4ceb-98e5-fc002e328a07\",\n                    \"name\": \"y\",\n                    \"is_hided\": false,\n                    \"is_deleted\": false,\n                    \"record_order\": 4,\n                    \"transaltion_fa\": \"ss\",\n                    \"transaltion_en\": \"xxz\",\n                    \"description_fa\": \"tt\",\n                    \"description_en\": \"vv\",\n                    \"data_type\": \"STRING\",\n                    \"indicator_type\": \"KPI\",\n                    \"unit_type\": \"S\",\n                    \"computations\": [\n                        {\n                            \"label\": \"label1\",\n                            \"description\": \"1\"\n                        },\n                        {\n                            \"label\": \"label2\",\n                            \"description\": \"2\"\n                        }\n                    ]\n                }\n            ]\n        }\n    ],\n    \"computing_table\": [\n        {\n            \"id\": \"a94447c5-ea21-4c65-b6d1-6251c429a9f4\",\n            \"description\": \"annn\",\n            \"command\": \"bsik\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8877/api/v1/document/:docId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8877",
+					"path": [
+						"api",
+						"v1",
+						"document",
+						":docId"
+					],
+					"variable": [
+						{
+							"key": "docId",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8877/api/v1/document/:docId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8877",
+					"path": [
+						"api",
+						"v1",
+						"document",
+						":docId"
+					],
+					"variable": [
+						{
+							"key": "docId",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\":\"admin\",\n    \"password\":\"Admin123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8877/api/v1/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8877",
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
