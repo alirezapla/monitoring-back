@@ -19,4 +19,7 @@ public class CreateBodyDto {
     @JsonProperty("doc_tables")
     private List<DocTableDto> docTableDto;
 
+    @JsonProperty("computing_table")
+    private List<ComputingTableItemsDto> computingTableItems;
+
 }

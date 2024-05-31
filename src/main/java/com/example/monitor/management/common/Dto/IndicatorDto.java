@@ -1,21 +1,19 @@
 package com.example.monitor.management.common.Dto;
 
-import com.example.monitor.management.domain.model.DataType;
-import com.example.monitor.management.domain.model.IndicatorType;
-import com.example.monitor.management.domain.model.UnitType;
+import com.example.monitor.management.domain.model.Computation;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Min;
-import java.util.List;
+import java.util.Set;
 
 
 @Getter
 @Setter
-public class IndicatorDto {
+public class IndicatorDto{
+
+    private String indicatorId;
 //    @NotNull(message = "The name is required.")
     private String name;
 //    @NotNull(message = "The order is required.")
@@ -36,6 +34,16 @@ public class IndicatorDto {
 //    @NotNull
     private String unitType;
 
+    private boolean isHided;
+
+
     @NotEmpty(message = "Input computation list cannot be empty.")
-    private List<String> computation;
+    @JsonProperty("computations")
+    private Set<Computation> computation;
+
+
+    public IndicatorDto getObject(){
+        return this;
+    }
+
 }

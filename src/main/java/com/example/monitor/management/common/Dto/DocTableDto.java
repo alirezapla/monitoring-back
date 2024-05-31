@@ -4,18 +4,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
-
 
 @Getter
 @Setter
 public class DocTableDto {
-//    @NotNull(message = "The name is required.")
+    private String tableId;
+    //    @NotNull(message = "The name is required.")
     private String name;
-//    @Valid
+    //    @Valid
     @JsonProperty("indicators")
     private List<IndicatorDto> indicators;
+
+    private boolean isHided;
+
+    public DocTableDto getObject() {
+        return this;
+    }
+
 
 }
