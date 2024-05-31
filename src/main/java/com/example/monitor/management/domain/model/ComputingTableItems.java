@@ -8,28 +8,21 @@ import lombok.Setter;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
+import java.util.UUID;
 
 
 @Setter
 @Getter
 @Entity
 @Table(name = "computing_table_items")
-@EqualsAndHashCode(exclude = "computingTable")
-public class ComputingTableItems {
-
-    @Id
-    @Size(min = 36, max = 36)
-    protected String id;
+@EqualsAndHashCode(exclude = "document", callSuper = false)
+public class ComputingTableItems extends BaseModel<DocTable> {
 
     @Column(name = "description")
     private String description;
 
     @Column(name = "command")
     private String command;
-
-    @Column(name = "is_hided")
-    private boolean isHided;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id", nullable = false)
@@ -40,11 +33,14 @@ public class ComputingTableItems {
     public ComputingTableItems() {
 
     }
-    public ComputingTableItems(String description, String command,Document document) {
+
+    public ComputingTableItems(String id, String description, String command, Document document) {
+        super(id);
         this.description = description;
         this.command = command;
         this.document = document;
     }
+
     public void visible(boolean isHide) {
         this.isHided = isHide;
     }

@@ -1,55 +1,70 @@
 package com.example.monitor.management.domain.model;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+import org.hibernate.annotations.ColumnTransformer;
 
 import javax.persistence.*;
 import java.util.Set;
-
-import com.example.monitor.management.common.Dto.ComputationDto;
 
 @Setter
 @Getter
 @Entity
 @Table(name = "indicator")
+@EqualsAndHashCode(exclude = "docTable", callSuper = false)
 public class Indicator extends BaseModel<Indicator> {
     @Column(name = "name")
     private String name;
 
     @Column(name = "record_order")
+    @JsonProperty("record_order")
     private Integer order;
 
     @Column(name = "transaltion_fa")
+    @JsonProperty("transaltion_fa")
     private String transaltionFa;
 
     @Column(name = "transaltion_en")
+    @JsonProperty("transaltion_en")
     private String transaltionEn;
 
     @Column(name = "description_fa")
+    @JsonProperty("description_fa")
     private String descriptionFa;
 
     @Column(name = "description_en")
+    @JsonProperty("description_en")
     private String descriptionEn;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "data_type")
+    @JsonProperty("data_type")
     private DataType dataType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "indicator_type")
+    @JsonProperty("indicator_type")
     private IndicatorType indicatorType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "unit")
+    @JsonProperty("unit_type")
     private UnitType unitType;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doc_table_id", nullable = false)
+    @JoinColumn(name = "doc_table_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnoreProperties("docTable")
     private DocTable docTable;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "indicator", fetch = FetchType.LAZY)
+    @Convert(converter = JsonConvertor.class)
+    @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
+    @JsonProperty("computation")
     private Set<Computation> computation;
 
 
@@ -65,7 +80,9 @@ public class Indicator extends BaseModel<Indicator> {
                      String descriptionEn,
                      DataType dataType,
                      IndicatorType indicatorType,
-                     UnitType unitType
+                     UnitType unitType,
+                     Set<Computation> computation,
+                     DocTable doctable
     ) {
         super(id);
         this.name = name;
@@ -77,10 +94,12 @@ public class Indicator extends BaseModel<Indicator> {
         this.dataType = dataType;
         this.indicatorType = indicatorType;
         this.unitType = unitType;
+        this.computation = computation;
+        this.docTable = doctable;
 
     }
 
-    public void addComputation(ComputationDto computationDto) {
-        this.computation.add(new Computation(computationDto.getLabel(), computationDto.getDescription()));
+    public void visible(boolean isHide) {
+        this.isHided = isHide;
     }
 }

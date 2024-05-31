@@ -20,17 +20,19 @@ public class AuthenticationService{
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final MyLogger logger;
 
 
-    public AuthenticationService(JwtUtil jwtUtil, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthenticationService(JwtUtil jwtUtil, UserRepository userRepository, PasswordEncoder passwordEncoder, MyLogger logger) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.logger = logger;
     }
 
     public LoginSuccessDTO login(LoginDTO loginDTO) {
         String username = loginDTO.getUsername();
-        MyLogger.doLog(LogLevel.INFO,AppLogEvent.LOGIN_SERVICE_STARTED, username);
+        logger.doLog(LogLevel.INFO,AppLogEvent.LOGIN_SERVICE_STARTED, username);
 
         String password = loginDTO.getPassword();
         User user = userRepository.findByUsername(username)

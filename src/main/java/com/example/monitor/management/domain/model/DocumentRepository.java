@@ -9,7 +9,7 @@ public interface DocumentRepository extends JpaRepository<Document, String> {
 
     Page<Document> findAllByOrderByCreatedDateDesc(Pageable pageable);
 
-    @Query(value = "SELECT d From Document d WHERE d.isHided = false and d.id=: id")
+    @Query(value = "SELECT d From Document d WHERE d.isHided = false and d.id=:id")
     Page<Document> findAllIsNotHided(Pageable pageable, String id);
 
     Page<Document> findAllById(Pageable pageable, String id);

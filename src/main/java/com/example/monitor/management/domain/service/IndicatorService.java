@@ -1,2 +1,117 @@
-package com.example.monitor.management.domain.service;public class IndicatorService {
+package com.example.monitor.management.domain.service;
+
+import com.example.monitor.management.api.utils.httputil.pagination.PageDTO;
+import com.example.monitor.management.common.Dto.IndicatorDto;
+import com.example.monitor.management.common.exceptions.ExceptionMessages;
+import com.example.monitor.management.common.exceptions.RecordNotFoundException;
+import com.example.monitor.management.domain.model.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class IndicatorService {
+    private final IndicatorRepository indicatorRepository;
+
+    public IndicatorService(IndicatorRepository indicatorRepository) {
+        this.indicatorRepository = indicatorRepository;
+    }
+
+    public PageDTO<Indicator> retrieveAll(String docTableId, PageRequest pageRequest) {
+        Page<Indicator> indicators = indicatorRepository.findAllByDocTableId(pageRequest, docTableId);
+        return new PageDTO<>(indicators.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), indicators.getTotalElements());
+    }
+
+    public PageDTO<Indicator> retrieveUnHided(String docTableId, PageRequest pageRequest) {
+        Page<Indicator> indicators = indicatorRepository.findAllUnHidedByDocTableId(pageRequest, docTableId);
+        return new PageDTO<>(indicators.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), indicators.getTotalElements());
+    }
+
+    @Transactional
+    public void create(DocTable docTable, List<IndicatorDto> indicators) {
+        indicators.forEach(i -> {
+            Indicator indicator = createIndicator(docTable, i);
+            docTable.addIndicator(indicator);
+        });
+        indicatorRepository.saveAll(docTable.getIndicators());
+    }
+
+    public void updateIndicators(DocTable docTable, List<IndicatorDto> updateIndicatorDto) {
+        List<Indicator> indicators = getIndicators(docTable);
+        Map<String, IndicatorDto> indicatorsMap = convertIndicatorsToMap(updateIndicatorDto);
+        Set<Indicator> updatedIndicators = new HashSet<>();
+        indicators.forEach(i -> {
+            if (indicatorsMap.containsKey(i.getId())) {
+                Indicator updatedindicator = updateIndicator(i, indicatorsMap.get(i.getId()));
+                updatedIndicators.add(updatedindicator);
+                updateIndicatorDto.remove(indicatorsMap.get(i.getId()));
+            }
+        });
+        omitDeletedIndicators(updatedIndicators, indicators);
+        docTable.setIndicators(updatedIndicators);
+        if (updateIndicatorDto.size() > 0) {
+            updateIndicatorDto.forEach(i -> {
+                docTable.addIndicator(createIndicator(docTable, i));
+            });
+        }
+        indicatorRepository.saveAll(updatedIndicators);
+    }
+
+    private List<Indicator> getIndicators(DocTable docTable) {
+        List<Indicator> indicators = indicatorRepository.findAllByDocTableId(docTable.getId());
+        if (indicators.isEmpty()) {
+            throw new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle());
+        }
+        return indicators;
+    }
+
+    private void omitDeletedIndicators(Set<Indicator> updatedIndicators, List<Indicator> currentIndicators) {
+        Set<String> updatedIndicatorIds = updatedIndicators.stream().map(BaseModel::getId).collect(Collectors.toSet());
+        currentIndicators.parallelStream()
+                .filter(i -> !updatedIndicatorIds.contains((i.getId())))
+                .forEach(indicatorRepository::delete);
+    }
+
+    private Indicator createIndicator(DocTable docTable, IndicatorDto indicatorDto) {
+        return new Indicator(UUID.randomUUID().toString(),
+                indicatorDto.getName(),
+                indicatorDto.getOrder(),
+                indicatorDto.getTransaltionFa(),
+                indicatorDto.getTransaltionEn(),
+                indicatorDto.getDescriptionFa(),
+                indicatorDto.getDescriptionEn(),
+                DataType.valueOf(indicatorDto.getDataType()),
+                IndicatorType.valueOf(indicatorDto.getIndicatorType()),
+                UnitType.valueOf(indicatorDto.getUnitType()),
+                indicatorDto.getComputation(),
+                docTable
+        );
+
+    }
+
+    private Indicator updateIndicator(Indicator indicator, IndicatorDto updateIndicatorDto) {
+        indicator.setName(updateIndicatorDto.getName());
+        indicator.setComputation(updateIndicatorDto.getComputation());
+        indicator.setOrder(updateIndicatorDto.getOrder());
+        indicator.setTransaltionEn(updateIndicatorDto.getTransaltionEn());
+        indicator.setTransaltionFa(updateIndicatorDto.getTransaltionFa());
+        indicator.setDescriptionEn(updateIndicatorDto.getDescriptionEn());
+        indicator.setDescriptionFa(updateIndicatorDto.getDescriptionFa());
+        indicator.setIndicatorType(IndicatorType.valueOf(updateIndicatorDto.getIndicatorType()));
+        indicator.setDataType(DataType.valueOf(updateIndicatorDto.getDataType()));
+        indicator.setUnitType(UnitType.valueOf(updateIndicatorDto.getUnitType()));
+        indicator.setComputation(updateIndicatorDto.getComputation());
+        indicator.visible(updateIndicatorDto.isHided());
+        return indicator;
+
+    }
+
+    private Map<String, IndicatorDto> convertIndicatorsToMap(List<IndicatorDto> updateIndicatorDto) {
+        return updateIndicatorDto.stream()
+                .collect(Collectors.toMap(IndicatorDto::getId, IndicatorDto::getObject));
+    }
 }

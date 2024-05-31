@@ -1,5 +1,7 @@
 package com.example.monitor.management.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,17 +18,24 @@ public class BaseModel<T extends BaseModel<T>> {
     @Id
     @Size(min = 36, max = 36)
     protected String id;
+    @JsonIgnore
     @Column(name = "created_date")
     protected Date createdDate;
+    @JsonIgnore
     @Column(name = "updated_date")
     protected Date updatedDate;
+    @JsonIgnore
     @Column(name = "updated_by")
     protected Date updatedBy;
+    @JsonIgnore
     @Column(name = "created_by")
     protected Date createdBy;
+
     @Column(name = "is_hided")
+    @JsonProperty("is_hided")
     protected boolean isHided;
     @Column(name = "is_deleted")
+    @JsonProperty("is_deleted")
     protected boolean isDeleted;
 
     public BaseModel() {
