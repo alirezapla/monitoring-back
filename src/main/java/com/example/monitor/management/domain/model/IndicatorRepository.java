@@ -5,10 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.history.RevisionRepository;
 
 import java.util.List;
 
-public interface IndicatorRepository extends JpaRepository<Indicator, String> {
+public interface IndicatorRepository extends RevisionRepository<Indicator, String, Long>,JpaRepository<Indicator, String> {
     @Query(value = "SELECT i From Indicator i WHERE i.docTable.id = :id")
     List<Indicator> findAllByDocTableId(String id);
 

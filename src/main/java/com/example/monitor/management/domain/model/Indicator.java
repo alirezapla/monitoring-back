@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.envers.Audited;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -15,6 +17,8 @@ import java.util.Set;
 @Getter
 @Entity
 @Table(name = "indicator")
+@Audited
+@EntityListeners(AuditingEntityListener.class)
 @EqualsAndHashCode(exclude = "docTable", callSuper = false)
 public class Indicator extends BaseModel<Indicator> {
     @Column(name = "name")
@@ -55,7 +59,6 @@ public class Indicator extends BaseModel<Indicator> {
     @JsonProperty("unit_type")
     private UnitType unitType;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doc_table_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnoreProperties("docTable")
@@ -64,8 +67,9 @@ public class Indicator extends BaseModel<Indicator> {
     @Convert(converter = JsonConvertor.class)
     @Column(columnDefinition = "jsonb")
     @ColumnTransformer(write = "?::jsonb")
-    @JsonProperty("computation")
+    @JsonProperty("computations")
     private Set<Computation> computation;
+
 
 
     public Indicator() {

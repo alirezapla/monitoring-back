@@ -52,14 +52,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
                 .authorizeRequests()
                 .mvcMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                .mvcMatchers(HttpMethod.GET, "/document").permitAll()
                 .mvcMatchers(HttpMethod.GET, "/document/{id}").permitAll()
 //                .hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
 //                .mvcMatchers(HttpMethod.PUT, "/document/{id}").hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
-                .mvcMatchers(HttpMethod.PUT, "/document/{id}").permitAll()
-                .mvcMatchers(HttpMethod.DELETE, "/document/{id}").permitAll()
-//                .hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
-                .mvcMatchers(HttpMethod.POST, "/document").permitAll()
-//                .hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
+                .mvcMatchers(HttpMethod.PUT, "/document/{id}").hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
+
+                .mvcMatchers(HttpMethod.DELETE, "/document/{id}").hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
+
+                .mvcMatchers(HttpMethod.POST, "/document").hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
+
 
                 .anyRequest()
                 .hasAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())

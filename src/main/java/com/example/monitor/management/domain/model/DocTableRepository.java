@@ -4,11 +4,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.history.RevisionRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface DocTableRepository extends JpaRepository<DocTable, String> {
+public interface DocTableRepository extends RevisionRepository<DocTable, String, Long>,JpaRepository<DocTable, String> {
 
 
     @Query(value = "SELECT d From DocTable d WHERE d.document.id = :docId")

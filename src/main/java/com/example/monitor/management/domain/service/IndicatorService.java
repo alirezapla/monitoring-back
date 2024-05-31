@@ -3,8 +3,10 @@ package com.example.monitor.management.domain.service;
 import com.example.monitor.management.api.utils.httputil.pagination.PageDTO;
 import com.example.monitor.management.common.Dto.IndicatorDto;
 import com.example.monitor.management.common.exceptions.ExceptionMessages;
+import com.example.monitor.management.common.exceptions.OrderDuplicatedException;
 import com.example.monitor.management.common.exceptions.RecordNotFoundException;
 import com.example.monitor.management.domain.model.*;
+import com.example.monitor.management.domain.model.security.CustomUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,21 +34,22 @@ public class IndicatorService {
     }
 
     @Transactional
-    public void create(DocTable docTable, List<IndicatorDto> indicators) {
+    public void create(CustomUserDetails customUserDetails, DocTable docTable, List<IndicatorDto> indicators) {
         indicators.forEach(i -> {
             Indicator indicator = createIndicator(docTable, i);
+            indicator.setCreatedBy(customUserDetails.getUserId());
             docTable.addIndicator(indicator);
         });
         indicatorRepository.saveAll(docTable.getIndicators());
     }
 
-    public void updateIndicators(DocTable docTable, List<IndicatorDto> updateIndicatorDto) {
+    public void updateIndicators(CustomUserDetails customUserDetails, DocTable docTable, List<IndicatorDto> updateIndicatorDto) {
         List<Indicator> indicators = getIndicators(docTable);
         Map<String, IndicatorDto> indicatorsMap = convertIndicatorsToMap(updateIndicatorDto);
         Set<Indicator> updatedIndicators = new HashSet<>();
         indicators.forEach(i -> {
             if (indicatorsMap.containsKey(i.getId())) {
-                Indicator updatedindicator = updateIndicator(i, indicatorsMap.get(i.getId()));
+                Indicator updatedindicator = updateIndicator(customUserDetails, i, indicatorsMap.get(i.getId()));
                 updatedIndicators.add(updatedindicator);
                 updateIndicatorDto.remove(indicatorsMap.get(i.getId()));
             }
@@ -58,7 +61,8 @@ public class IndicatorService {
                 docTable.addIndicator(createIndicator(docTable, i));
             });
         }
-        indicatorRepository.saveAll(updatedIndicators);
+        orderValidator(docTable.getIndicators());
+        indicatorRepository.saveAll(docTable.getIndicators());
     }
 
     private List<Indicator> getIndicators(DocTable docTable) {
@@ -93,9 +97,9 @@ public class IndicatorService {
 
     }
 
-    private Indicator updateIndicator(Indicator indicator, IndicatorDto updateIndicatorDto) {
+    private Indicator updateIndicator(CustomUserDetails customUserDetails, Indicator indicator, IndicatorDto updateIndicatorDto) {
+        indicator.setUpdatedBy(customUserDetails.getUserId());
         indicator.setName(updateIndicatorDto.getName());
-        indicator.setComputation(updateIndicatorDto.getComputation());
         indicator.setOrder(updateIndicatorDto.getOrder());
         indicator.setTransaltionEn(updateIndicatorDto.getTransaltionEn());
         indicator.setTransaltionFa(updateIndicatorDto.getTransaltionFa());
@@ -113,5 +117,16 @@ public class IndicatorService {
     private Map<String, IndicatorDto> convertIndicatorsToMap(List<IndicatorDto> updateIndicatorDto) {
         return updateIndicatorDto.stream()
                 .collect(Collectors.toMap(IndicatorDto::getId, IndicatorDto::getObject));
+    }
+
+    private void orderValidator(Set<Indicator> indicators) {
+        Map<Integer, Long> orderCont = indicators.stream()
+                .collect(Collectors.groupingBy(Indicator::getOrder, Collectors.counting()));
+        orderCont.forEach((key, value) -> {
+            if (value > 1) {
+                throw new OrderDuplicatedException("Orders must be unique");
+            }
+        });
+
     }
 }

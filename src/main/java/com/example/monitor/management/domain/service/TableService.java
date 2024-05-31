@@ -3,10 +3,10 @@ package com.example.monitor.management.domain.service;
 import com.example.monitor.management.api.utils.httputil.pagination.PageDTO;
 import com.example.monitor.management.common.Dto.BodyDto;
 import com.example.monitor.management.common.Dto.DocTableDto;
-import com.example.monitor.management.common.Dto.DocTableInterface;
 import com.example.monitor.management.common.exceptions.ExceptionMessages;
 import com.example.monitor.management.common.exceptions.RecordNotFoundException;
 import com.example.monitor.management.domain.model.*;
+import com.example.monitor.management.domain.model.security.CustomUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class TableService {
 
     public PageDTO<DocTable> retrieveAll(String docId, PageRequest pageRequest) {
         Page<DocTable> docTables = docTableRepository.findAllByDocumentId(pageRequest, docId);
-        docTables.forEach(d->{
+        docTables.forEach(d -> {
             d.setIndicators(new HashSet<>(indicatorService.retrieveAll(d.getId(), pageRequest).getItems()));
         });
         return new PageDTO<>(docTables.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), docTables.getTotalElements());
@@ -36,7 +36,7 @@ public class TableService {
 
     public PageDTO<DocTable> retrieveUnHided(String docId, PageRequest pageRequest) {
         Page<DocTable> docTables = docTableRepository.findAllUnHidedByDocumentId(pageRequest, docId);
-        docTables.forEach(d->{
+        docTables.forEach(d -> {
             d.setIndicators(new HashSet<>(indicatorService.retrieveUnHided(d.getId(), pageRequest).getItems()));
         });
         return new PageDTO<>(docTables.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), docTables.getTotalElements());
@@ -44,17 +44,16 @@ public class TableService {
     }
 
     @Transactional
-    public void createTable(Document document, BodyDto createBodyDto) {
+    public Set<DocTable> createTable(CustomUserDetails customUserDetails, Document document, BodyDto createBodyDto) {
+        Set<DocTable> docTables = new HashSet<>();
         createBodyDto.getDocTableDto().forEach(d -> {
-            createNewDocTale(document, d);
+            docTables.add(createNewDocTale(customUserDetails, document, d));
         });
+        return docTables;
     }
 
-    public Set<DocTable> update(Document document, List<DocTableDto> updateTableDto) {
-        List<DocTable> docTables = docTableRepository.findAllByDocumentId(document.getId());
-        if (docTables.isEmpty()) {
-            throw new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle());
-        }
+    public Set<DocTable> update(CustomUserDetails customUserDetails, Document document, List<DocTableDto> updateTableDto) {
+        List<DocTable> docTables = getDocTables(document);
         Map<String, DocTableDto> tableMap = convertDocTableToMap(updateTableDto);
         Set<DocTable> updatedDocTables = new HashSet<>();
         docTables.forEach(d -> {
@@ -62,19 +61,28 @@ public class TableService {
                 DocTableDto tableDto = tableMap.get(d.getId());
                 d.setName(tableDto.getName());
                 d.visible(tableDto.isHided());
+                d.setUpdatedBy(customUserDetails.getUserId());
                 updatedDocTables.add(d);
                 updateTableDto.remove(tableDto);
                 docTableRepository.save(d);
-                indicatorService.updateIndicators(d, tableDto.getIndicators());
+                indicatorService.updateIndicators(customUserDetails, d, tableDto.getIndicators());
             }
         });
         omitDeletedTables(updatedDocTables, docTables);
         if (updateTableDto.size() > 0) {
             updateTableDto.forEach(i -> {
-                createNewDocTale(document, i);
+                updatedDocTables.add(createNewDocTale(customUserDetails, document, i));
             });
         }
-        return new HashSet<>(docTables);
+        return updatedDocTables;
+    }
+
+    private List<DocTable> getDocTables(Document document) {
+        List<DocTable> docTables = docTableRepository.findAllByDocumentId(document.getId());
+        if (docTables.isEmpty()) {
+            throw new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle());
+        }
+        return docTables;
     }
 
     private void omitDeletedTables(Set<DocTable> updatedDocTables, List<DocTable> currentDocTables) {
@@ -86,10 +94,11 @@ public class TableService {
         return updateTableDto.stream().collect(Collectors.toMap(DocTableDto::getId, DocTableDto::getObject));
     }
 
-    private void createNewDocTale(Document document, DocTableDto docTable) {
+    private DocTable createNewDocTale(CustomUserDetails customUserDetails, Document document, DocTableDto docTable) {
         DocTable newDocTable = new DocTable(UUID.randomUUID().toString(), docTable.getName(), document);
+        newDocTable.setCreatedBy(customUserDetails.getUserId());
         docTableRepository.save(newDocTable);
-        document.addTable(newDocTable);
-        indicatorService.create(newDocTable, docTable.getIndicators());
+        indicatorService.create(customUserDetails, newDocTable, docTable.getIndicators());
+        return newDocTable;
     }
 }

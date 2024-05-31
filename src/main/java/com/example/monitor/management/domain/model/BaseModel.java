@@ -18,6 +18,9 @@ public class BaseModel<T extends BaseModel<T>> {
     @Id
     @Size(min = 36, max = 36)
     protected String id;
+    @Version
+    @JsonIgnore
+    private Integer version;
     @JsonIgnore
     @Column(name = "created_date")
     protected Date createdDate;
@@ -26,10 +29,10 @@ public class BaseModel<T extends BaseModel<T>> {
     protected Date updatedDate;
     @JsonIgnore
     @Column(name = "updated_by")
-    protected Date updatedBy;
+    protected String updatedBy;
     @JsonIgnore
     @Column(name = "created_by")
-    protected Date createdBy;
+    protected String createdBy;
 
     @Column(name = "is_hided")
     @JsonProperty("is_hided")

@@ -1,4 +1,4 @@
-package com.example.monitor.management.api.utils.httputil;
+package com.example.monitor.management.api.utils.httputil.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 

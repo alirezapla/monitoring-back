@@ -23,13 +23,14 @@ public class ComputingTableService {
         this.computingTableItemsRepository = computingTableItemsRepository;
     }
 
-    public void create(Document document, BodyDto bodyDto) {
+    public Set<ComputingTableItems> create(Document document, BodyDto bodyDto) {
         Set<ComputingTableItems> computingTableItems = new HashSet<>();
         bodyDto.getComputingTableItems().forEach(i -> {
             computingTableItems.add(new ComputingTableItems(
                     UUID.randomUUID().toString(), i.getCommand(), i.getDescription(), document));
         });
         computingTableItemsRepository.saveAll(computingTableItems);
+        return computingTableItems;
     }
 
     public PageDTO<ComputingTableItems> retrieveAll(String docId, PageRequest pageRequest) {

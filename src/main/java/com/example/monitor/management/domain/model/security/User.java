@@ -1,18 +1,21 @@
 package com.example.monitor.management.domain.model.security;
 
 
-
 import com.example.monitor.management.domain.model.BaseModel;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user_credentials")
-public class User extends BaseModel<User> {
+public class User {
 
-
+    @Id
+    @Size(min = 36, max = 36)
+    protected String id;
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
@@ -26,8 +29,8 @@ public class User extends BaseModel<User> {
     public User() {
     }
 
-    public User(String id,String username, String password, Set<UserAuthority> userAuthorities) {
-        super(id);
+    public User(String id, String username, String password, Set<UserAuthority> userAuthorities) {
+        this.id = UUID.randomUUID().toString();
         this.username = username;
         this.password = password;
         this.userAuthorities = userAuthorities;
@@ -46,12 +49,16 @@ public class User extends BaseModel<User> {
         return userAuthorities;
     }
 
-    public void updateUser( String username, Set<UserAuthority> userAuthorities) {
+    public void updateUser(String username, Set<UserAuthority> userAuthorities) {
         this.username = username;
         this.userAuthorities = userAuthorities;
     }
 
-    public void updatePassword(String password){
+    public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public String getId() {
+        return this.id;
     }
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -15,8 +17,10 @@ import java.util.UUID;
 @Getter
 @Entity
 @Table(name = "computing_table_items")
+@Audited
+@EntityListeners(AuditingEntityListener.class)
 @EqualsAndHashCode(exclude = "document", callSuper = false)
-public class ComputingTableItems extends BaseModel<DocTable> {
+public class ComputingTableItems extends BaseModel<ComputingTableItems> {
 
     @Column(name = "description")
     private String description;
