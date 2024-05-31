@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.boot.logging.LogLevel;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.ZonedDateTime;
@@ -14,18 +15,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configurable
+@Component
 public class MyLogger {
-    public static Logger logger;
-
-    {
-        logger = LoggerFactory.getLogger(this.getClass());
-    }
+    private final Logger logger;
 
     public MyLogger() {
+        this.logger = LoggerFactory.getLogger(this.getClass());
     }
 
-    public static void doLog(LogLevel logLevel,AppLogEvent event, Object payload) {
+    public void doLog(LogLevel logLevel,AppLogEvent event, Object payload) {
         String message = new HashMap<String, Object>() {{
             put("Event", event);
             put("Body", payload);
