@@ -28,13 +28,13 @@ public class Indicator extends BaseModel<Indicator> {
     @JsonProperty("record_order")
     private Integer order;
 
-    @Column(name = "transaltion_fa")
-    @JsonProperty("transaltion_fa")
-    private String transaltionFa;
+    @Column(name = "translation_fa")
+    @JsonProperty("translation_fa")
+    private String translationFa;
 
-    @Column(name = "transaltion_en")
-    @JsonProperty("transaltion_en")
-    private String transaltionEn;
+    @Column(name = "translation_en")
+    @JsonProperty("translation_en")
+    private String translationEn;
 
     @Column(name = "description_fa")
     @JsonProperty("description_fa")
@@ -78,8 +78,8 @@ public class Indicator extends BaseModel<Indicator> {
     public Indicator(String id,
                      String name,
                      Integer order,
-                     String transaltionFa,
-                     String transaltionEn,
+                     String translationFa,
+                     String translationEn,
                      String descriptionFa,
                      String descriptionEn,
                      DataType dataType,
@@ -91,8 +91,8 @@ public class Indicator extends BaseModel<Indicator> {
         super(id);
         this.name = name;
         this.order = order;
-        this.transaltionFa = transaltionFa;
-        this.transaltionEn = transaltionEn;
+        this.translationFa = translationFa;
+        this.translationEn = translationEn;
         this.descriptionFa = descriptionFa;
         this.descriptionEn = descriptionEn;
         this.dataType = dataType;

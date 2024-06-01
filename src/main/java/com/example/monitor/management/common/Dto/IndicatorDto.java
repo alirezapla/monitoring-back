@@ -33,11 +33,11 @@ public class IndicatorDto {
     @JsonProperty("record_order")
     private Integer order;
     @NotNull(message = "The transaltion_fa is required.")
-    @JsonProperty("transaltion_fa")
-    private String transaltionFa;
+    @JsonProperty("translation_fa")
+    private String translationFa;
     @NotNull(message = "The transaltion_en is required.")
-    @JsonProperty("transaltion_en")
-    private String transaltionEn;
+    @JsonProperty("translation_en")
+    private String translationEn;
     @NotNull(message = "The description_fa is required.")
     @JsonProperty("description_fa")
     private String descriptionFa;

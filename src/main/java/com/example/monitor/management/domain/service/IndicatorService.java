@@ -84,8 +84,8 @@ public class IndicatorService {
         return new Indicator(UUID.randomUUID().toString(),
                 indicatorDto.getName(),
                 indicatorDto.getOrder(),
-                indicatorDto.getTransaltionFa(),
-                indicatorDto.getTransaltionEn(),
+                indicatorDto.getTranslationFa(),
+                indicatorDto.getTranslationEn(),
                 indicatorDto.getDescriptionFa(),
                 indicatorDto.getDescriptionEn(),
                 DataType.valueOf(indicatorDto.getDataType()),
@@ -101,8 +101,8 @@ public class IndicatorService {
         indicator.setUpdatedBy(customUserDetails.getUserId());
         indicator.setName(updateIndicatorDto.getName());
         indicator.setOrder(updateIndicatorDto.getOrder());
-        indicator.setTransaltionEn(updateIndicatorDto.getTransaltionEn());
-        indicator.setTransaltionFa(updateIndicatorDto.getTransaltionFa());
+        indicator.setTranslationEn(updateIndicatorDto.getTranslationEn());
+        indicator.setTranslationFa(updateIndicatorDto.getTranslationFa());
         indicator.setDescriptionEn(updateIndicatorDto.getDescriptionEn());
         indicator.setDescriptionFa(updateIndicatorDto.getDescriptionFa());
         indicator.setIndicatorType(IndicatorType.valueOf(updateIndicatorDto.getIndicatorType()));
