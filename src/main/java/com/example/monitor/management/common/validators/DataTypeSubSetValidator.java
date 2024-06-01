@@ -9,8 +9,8 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 
-public class DataTypeSubSetValidator implements ConstraintValidator<DataTypeSubset, DataType> {
-    private DataType[] subset;
+public class DataTypeSubSetValidator implements ConstraintValidator<DataTypeSubset, String> {
+    private String[] subset;
 
     @Override
     public void initialize(DataTypeSubset constraint) {
@@ -18,12 +18,11 @@ public class DataTypeSubSetValidator implements ConstraintValidator<DataTypeSubs
     }
 
     @Override
-    public boolean isValid(DataType dataType, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(String dataType, ConstraintValidatorContext constraintValidatorContext) {
         if (Arrays.asList(subset).contains(dataType)){
             return true;
         }
-        throw new BodyValidationException("Valid Data Types are"+ Arrays.toString(subset));
-
+        return false;
     }
 
 

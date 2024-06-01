@@ -18,7 +18,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Constraint(validatedBy = UnitTypeSubSetValidator.class)
 public @interface UnitTypeSubset {
-    UnitType[] anyOf();
+    String[] anyOf();
     String message() default "must be any of {anyOf}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

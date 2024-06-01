@@ -16,7 +16,7 @@ import com.example.monitor.management.domain.model.IndicatorType;
 @Documented
 @Constraint(validatedBy = IndicatorTypeSubSetValidator.class)
 public @interface IndicatorTypeSubset {
-    IndicatorType[] anyOf();
+    String[] anyOf();
     String message() default "must be any of {anyOf}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};

@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
@@ -21,18 +24,35 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return ResponseEntity.status(status).body(this.body(ex.getMessage(), status));
     }
 
-    @ExceptionHandler(value = {InvalidClientPerspective.class,OrderDuplicatedException.class, BodyValidationException.class})
+    @ExceptionHandler(value = {InvalidClientPerspective.class, OrderDuplicatedException.class, BodyValidationException.class})
     protected ResponseEntity<Object> handleBadRequestException(Exception ex) {
         ex.printStackTrace();
         int status = HttpStatus.BAD_REQUEST.value();
         return ResponseEntity.status(status).body(this.body(ex.getMessage(), status));
     }
+
+    @ExceptionHandler(value = {ConstraintViolationException.class})
+    protected ResponseEntity<Object> handleCustomValidationBadRequestException(ConstraintViolationException c) {
+        Set<ConstraintViolation<?>> violations = c.getConstraintViolations();
+        String errorMessage = "";
+        if (!violations.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            violations.forEach(violation -> builder.append(" " + violation.getMessage()));
+            errorMessage = builder.toString();
+        } else {
+            errorMessage = "CCC";
+        }
+        int status = HttpStatus.BAD_REQUEST.value();
+        return ResponseEntity.status(status).body(this.body(errorMessage, status));
+    }
+
     @ExceptionHandler(value = {RecordNotFoundException.class})
     protected ResponseEntity<Object> handleNotFoundException(Exception ex) {
         ex.printStackTrace();
         int status = HttpStatus.NOT_FOUND.value();
         return ResponseEntity.status(status).body(this.body(ex.getMessage(), status));
     }
+
     private Map<String, Object> body(String message, Integer status) {
         Map<String, Object> body = new HashMap<>();
         body.put("status", status);

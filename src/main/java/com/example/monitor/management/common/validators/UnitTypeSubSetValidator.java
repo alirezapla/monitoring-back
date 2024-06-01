@@ -8,8 +8,8 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 
-public class UnitTypeSubSetValidator implements ConstraintValidator<UnitTypeSubset, UnitType> {
-    private UnitType[] subset;
+public class UnitTypeSubSetValidator implements ConstraintValidator<UnitTypeSubset, String> {
+    private String[] subset;
 
     @Override
     public void initialize(UnitTypeSubset constraint) {
@@ -17,7 +17,7 @@ public class UnitTypeSubSetValidator implements ConstraintValidator<UnitTypeSubs
     }
 
     @Override
-    public boolean isValid(UnitType unitType, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(String unitType, ConstraintValidatorContext constraintValidatorContext) {
         return unitType == null || Arrays.asList(subset).contains(unitType);
     }
 

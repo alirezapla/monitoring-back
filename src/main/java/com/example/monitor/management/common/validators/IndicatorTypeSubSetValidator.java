@@ -7,8 +7,8 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
 
-public class IndicatorTypeSubSetValidator implements ConstraintValidator<IndicatorTypeSubset, IndicatorType> {
-    private IndicatorType[] subset;
+public class IndicatorTypeSubSetValidator implements ConstraintValidator<IndicatorTypeSubset, String> {
+    private String[] subset;
 
     @Override
     public void initialize(IndicatorTypeSubset constraint) {
@@ -16,7 +16,7 @@ public class IndicatorTypeSubSetValidator implements ConstraintValidator<Indicat
     }
 
     @Override
-    public boolean isValid(IndicatorType indicatorType, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(String indicatorType, ConstraintValidatorContext constraintValidatorContext) {
         return indicatorType == null || Arrays.asList(subset).contains(indicatorType);
     }
 

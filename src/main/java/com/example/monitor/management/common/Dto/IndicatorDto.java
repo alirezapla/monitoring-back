@@ -45,17 +45,16 @@ public class IndicatorDto {
     @JsonProperty("description_en")
     private String descriptionEn;
     @NotNull
-    @DataTypeSubset(anyOf = {DataType.DATETIME, DataType.FLOAT, DataType.ENUM, DataType.STRING, DataType.INT})
+    @DataTypeSubset(anyOf = {"DATETIME", "FLOAT", "ENUM", "STRING", "INT"})
     @JsonProperty("data_type")
-    private DataType dataType;
+    private String dataType;
     @NotNull
-    @IndicatorTypeSubset(anyOf = {IndicatorType.KPI, IndicatorType.DYNAMIC_DATA})
+    @IndicatorTypeSubset(anyOf = {"KPI", "DYNAMIC_DATA"})
     @JsonProperty("indicator_type")
-    private IndicatorType indicatorType;
-    @NotNull
-    @UnitTypeSubset(anyOf = {UnitType.MS, UnitType.S, UnitType.H, UnitType.M})
+    private String indicatorType;
+    @UnitTypeSubset(anyOf = {"MS", "S", "H", "M"})
     @JsonProperty("unit_type")
-    private UnitType unitType;
+    private String unitType;
 
     @JsonProperty("is_hided")
     private boolean isHided;
