@@ -22,7 +22,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 
 @RestController
-@RequestMapping(value = "document")
+@RequestMapping(value = "documents")
 public class DocumentController {
     private final DocumentService documentService;
     private final MyLogger logger;
