@@ -9,9 +9,9 @@
 API
 
 ```
-POST /api/v1/document       {Body}
-GET /api/v1/document
-GET /api/v1/document/:docId 
-PUT /api/v1/document/:docId {Body}
-DELETE /api/v1/document/:docId
+POST /api/v1/documents       {Body}
+GET /api/v1/documents
+GET /api/v1/documents/:docId 
+PUT /api/v1/documents/:docId {Body}
+DELETE /api/v1/documents/:docId
 ```
