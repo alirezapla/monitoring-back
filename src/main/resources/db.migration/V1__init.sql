@@ -1,4 +1,4 @@
-create table monitoring.document
+create table document
 (
     id           varchar(255) not null primary key,
     created_date date         null,
@@ -11,7 +11,7 @@ create table monitoring.document
     name         varchar(128)
 );
 
-create table monitoring.doc_table
+create table doc_table
 (
     id           varchar(255) not null primary key,
     created_date date         null,
@@ -23,7 +23,7 @@ create table monitoring.doc_table
     name         varchar(128),
     document_id  varchar(256)
 );
-create table monitoring.indicator
+create table indicator
 (
     id           varchar(255) not null primary key,
     created_date date         null,
@@ -45,7 +45,7 @@ create table monitoring.indicator
     computation  JSONB
 );
 
-create table monitoring.computing_table_items
+create table computing_table_items
 (
     id           varchar(255) not null primary key,
     created_date date         null,
@@ -62,34 +62,34 @@ create table monitoring.computing_table_items
 );
 
 
-create table monitoring.user_credentials
+create table user_credentials
 (
     id          varchar(255) not null primary key,
     password    varchar(255) not null,
     username    varchar(255) not null
 );
 
-create table monitoring.user_authority
+create table user_authority
 (
     user_credential_id varchar(255) not null,
     user_authority     varchar(255) not null,
     primary key (user_credential_id, user_authority)
 );
 
-alter table monitoring.user_credentials
+alter table user_credentials
     add constraint UK_8pcilw7ay5rs8c4dtrtik21pw unique (username);
-alter table monitoring.user_authority
+alter table user_authority
     add constraint FK9eonwn7vhem2ho9n3oikh4c9s foreign key (user_credential_id) references user_credentials (id);
-alter table monitoring.doc_table
+alter table doc_table
     add constraint doc_table_document_fk foreign key (document_id) references document (id);
-alter table monitoring.computing_table_items
+alter table computing_table_items
     add constraint document_computing_table_items_fk foreign key (document_id) references document (id);
-alter table monitoring.indicator
+alter table indicator
     add constraint doc_table_indicator_fk foreign key (doc_table_id) references doc_table (id);
 
-INSERT INTO monitoring.user_credentials(id, username, password)
+INSERT INTO user_credentials(id, username, password)
 VALUES ('9153ee25-9767-4d5a-bfc7-42db1ca0accf', 'admin',
         '$2a$12$DKBWuNEGrVj0QS97YQBUdO6qIGyxq1PKQe1ygGKUG6S3T7zEt516y');
 
-INSERT INTO monitoring.user_authority(user_credential_id, user_authority)
+INSERT INTO user_authority(user_credential_id, user_authority)
 VALUES ('9153ee25-9767-4d5a-bfc7-42db1ca0accf', 'AUTHORITY_ADMIN');
