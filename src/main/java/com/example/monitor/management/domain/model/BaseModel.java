@@ -37,16 +37,12 @@ public class BaseModel<T extends BaseModel<T>> {
     @Column(name = "is_hided")
     @JsonProperty("is_hided")
     protected boolean isHided;
-    @Column(name = "is_deleted")
-    @JsonProperty("is_deleted")
-    protected boolean isDeleted;
+
 
     public BaseModel() {
         this.id = UUID.randomUUID().toString();
         this.createdDate = new Date(System.currentTimeMillis());
         this.updatedDate = new Date(System.currentTimeMillis());
-        this.isDeleted = false;
-        this.isDeleted = false;
     }
     protected BaseModel(String id) {
         this.id = id;
