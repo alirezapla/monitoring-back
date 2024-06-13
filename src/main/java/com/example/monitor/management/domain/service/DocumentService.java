@@ -78,6 +78,7 @@ public class DocumentService {
         MyLogger.doLog(LogLevel.INFO, AppLogEvent.UPDATE_DOCUMENT_SERVICE_STARTED, docId);
         Document document = getDocument(docId);
         document.setDescription(bodyDto.getDescription());
+        document.setHided(bodyDto.isHided());
         Set<DocTable> docTable = tableService.update(customUserDetails, document, bodyDto.getDocTableDto());
         document.setDocTables(docTable);
         Set<ComputingTableItems> computingTable = computingTableService.update(document, bodyDto);
@@ -85,6 +86,9 @@ public class DocumentService {
         document.setUpdatedBy(customUserDetails.getUsername());
         documentRepository.save(document);
         MyLogger.doLog(LogLevel.INFO, AppLogEvent.UPDATE_DOCUMENT_SERVICE_FINISHED, document.getId());
+        if (bodyDto.isHided()) {
+            return null;
+        }
         return new DocumentResponseDto(document);
     }
 
