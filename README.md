@@ -15,6 +15,8 @@ GET /api/v1/documents/:docId
 PUT /api/v1/documents/:docId {Body}
 DELETE /api/v1/documents/:docId
 ```
+****
+let's try it
 
 ```bash
 docker-compose up --build
