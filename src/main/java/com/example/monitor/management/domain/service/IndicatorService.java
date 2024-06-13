@@ -1,14 +1,15 @@
 package com.example.monitor.management.domain.service;
 
 import com.example.monitor.management.api.utils.httputil.pagination.PageDTO;
+import com.example.monitor.management.common.Dto.IndicatorComputationDto;
 import com.example.monitor.management.common.Dto.IndicatorDto;
 import com.example.monitor.management.common.exceptions.ExceptionMessages;
 import com.example.monitor.management.common.exceptions.OrderDuplicatedException;
 import com.example.monitor.management.common.exceptions.RecordNotFoundException;
 import com.example.monitor.management.domain.model.*;
-import com.example.monitor.management.domain.model.security.CustomUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -18,9 +19,11 @@ import java.util.stream.Collectors;
 @Service
 public class IndicatorService {
     private final IndicatorRepository indicatorRepository;
+    private final ComputationRepository computationRepository;
 
-    public IndicatorService(IndicatorRepository indicatorRepository) {
+    public IndicatorService(IndicatorRepository indicatorRepository, ComputationRepository computationRepository) {
         this.indicatorRepository = indicatorRepository;
+        this.computationRepository = computationRepository;
     }
 
     public PageDTO<Indicator> retrieveAll(String docTableId, PageRequest pageRequest) {
@@ -34,27 +37,26 @@ public class IndicatorService {
     }
 
     @Transactional
-    public void create(CustomUserDetails customUserDetails, DocTable docTable, List<IndicatorDto> indicators) {
+    public void create(UserDetails customUserDetails, DocTable docTable, List<IndicatorDto> indicators) {
         indicators.forEach(i -> {
             Indicator indicator = createIndicator(docTable, i);
-            indicator.setCreatedBy(customUserDetails.getUserId());
+            indicator.setCreatedBy(customUserDetails.getUsername());
             docTable.addIndicator(indicator);
         });
-        indicatorRepository.saveAll(docTable.getIndicators());
     }
 
-    public void updateIndicators(CustomUserDetails customUserDetails, DocTable docTable, List<IndicatorDto> updateIndicatorDto) {
-        List<Indicator> indicators = getIndicators(docTable);
+    @Transactional
+    public void updateIndicators(UserDetails customUserDetails, DocTable docTable, List<IndicatorDto> updateIndicatorDto) {
         Map<String, IndicatorDto> indicatorsMap = convertIndicatorsToMap(updateIndicatorDto);
         Set<Indicator> updatedIndicators = new HashSet<>();
-        indicators.forEach(i -> {
+        docTable.getIndicators().forEach(i -> {
             if (indicatorsMap.containsKey(i.getId())) {
                 Indicator updatedindicator = updateIndicator(customUserDetails, i, indicatorsMap.get(i.getId()));
                 updatedIndicators.add(updatedindicator);
                 updateIndicatorDto.remove(indicatorsMap.get(i.getId()));
             }
         });
-        omitDeletedIndicators(updatedIndicators, indicators);
+        omitDeletedIndicators(updatedIndicators, docTable.getIndicators());
         docTable.setIndicators(updatedIndicators);
         if (updateIndicatorDto.size() > 0) {
             updateIndicatorDto.forEach(i -> {
@@ -62,18 +64,10 @@ public class IndicatorService {
             });
         }
         orderValidator(docTable.getIndicators());
-        indicatorRepository.saveAll(docTable.getIndicators());
     }
 
-    private List<Indicator> getIndicators(DocTable docTable) {
-        List<Indicator> indicators = indicatorRepository.findAllByDocTableId(docTable.getId());
-        if (indicators.isEmpty()) {
-            throw new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle());
-        }
-        return indicators;
-    }
 
-    private void omitDeletedIndicators(Set<Indicator> updatedIndicators, List<Indicator> currentIndicators) {
+    private void omitDeletedIndicators(Set<Indicator> updatedIndicators, Set<Indicator> currentIndicators) {
         Set<String> updatedIndicatorIds = updatedIndicators.stream().map(BaseModel::getId).collect(Collectors.toSet());
         currentIndicators.parallelStream()
                 .filter(i -> !updatedIndicatorIds.contains((i.getId())))
@@ -81,7 +75,7 @@ public class IndicatorService {
     }
 
     private Indicator createIndicator(DocTable docTable, IndicatorDto indicatorDto) {
-        return new Indicator(UUID.randomUUID().toString(),
+        Indicator indicator = new Indicator(UUID.randomUUID().toString(),
                 indicatorDto.getName(),
                 indicatorDto.getOrder(),
                 indicatorDto.getTranslationFa(),
@@ -91,14 +85,22 @@ public class IndicatorService {
                 DataType.valueOf(indicatorDto.getDataType()),
                 IndicatorType.valueOf(indicatorDto.getIndicatorType()),
                 UnitType.valueOf(indicatorDto.getUnitType()),
-                indicatorDto.getComputation(),
                 docTable
         );
-
+        return indicator.insertComputations(
+                mapComputationsDtoToComputations(indicator, indicatorDto.getComputations()));
     }
 
-    private Indicator updateIndicator(CustomUserDetails customUserDetails, Indicator indicator, IndicatorDto updateIndicatorDto) {
-        indicator.setUpdatedBy(customUserDetails.getUserId());
+    private Set<Computation> mapComputationsDtoToComputations(Indicator indicator, Set<IndicatorComputationDto> indicatorComputationDto) {
+        Set<Computation> computations = new HashSet<>();
+        indicatorComputationDto.forEach(i -> {
+            computations.add(new Computation(i.getLabel(), i.getDescription(), indicator));
+        });
+        return computations;
+    }
+
+    private Indicator updateIndicator(UserDetails customUserDetails, Indicator indicator, IndicatorDto updateIndicatorDto) {
+        indicator.setUpdatedBy(customUserDetails.getUsername());
         indicator.setName(updateIndicatorDto.getName());
         indicator.setOrder(updateIndicatorDto.getOrder());
         indicator.setTranslationEn(updateIndicatorDto.getTranslationEn());
@@ -108,10 +110,41 @@ public class IndicatorService {
         indicator.setIndicatorType(IndicatorType.valueOf(updateIndicatorDto.getIndicatorType()));
         indicator.setDataType(DataType.valueOf(updateIndicatorDto.getDataType()));
         indicator.setUnitType(UnitType.valueOf(updateIndicatorDto.getUnitType()));
-        indicator.setComputation(updateIndicatorDto.getComputation());
         indicator.visible(updateIndicatorDto.isHided());
+        updateIndicatorComputations(indicator, updateIndicatorDto.getComputations());
+
         return indicator;
 
+    }
+
+    private void updateIndicatorComputations(Indicator indicator, Set<IndicatorComputationDto> indicatorComputationsDto) {
+        Set<Computation> updatedComputations = new HashSet<>();
+        Map<String, IndicatorComputationDto> indicatorComputationDtoMap = indicatorComputationsDto.stream()
+                .collect(Collectors.toMap(IndicatorComputationDto::getId, IndicatorComputationDto::getObject));
+
+        indicator.getComputations().forEach(i -> {
+            IndicatorComputationDto indicatorComputation = indicatorComputationDtoMap.get(i.getId());
+            if (indicatorComputationDtoMap.containsKey(i.getId())) {
+                i.setDescription(indicatorComputation.getDescription());
+                i.setLabel(indicatorComputation.getLabel());
+                updatedComputations.add(i);
+                indicatorComputationsDto.remove(indicatorComputationDtoMap.get(i.getId()));
+            }
+        });
+        omitDeletedComputation(updatedComputations, indicator.getComputations());
+        indicator.setComputations(updatedComputations);
+        if (indicatorComputationsDto.size() > 0) {
+            indicatorComputationsDto.forEach(i -> {
+                indicator.addComputation(new Computation(i.getLabel(), i.getDescription(),indicator));
+            });
+        }
+    }
+
+    private void omitDeletedComputation(Set<Computation> updatedComputations, Set<Computation> computations) {
+        Set<String> updatedComputationIds = updatedComputations.stream().map(Computation::getId).collect(Collectors.toSet());
+        computations.parallelStream()
+                .filter(i -> !updatedComputationIds.contains((i.getId())))
+                .forEach(computationRepository::delete);
     }
 
     private Map<String, IndicatorDto> convertIndicatorsToMap(List<IndicatorDto> updateIndicatorDto) {

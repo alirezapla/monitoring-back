@@ -6,9 +6,9 @@ import com.example.monitor.management.common.Dto.DocTableDto;
 import com.example.monitor.management.common.exceptions.ExceptionMessages;
 import com.example.monitor.management.common.exceptions.RecordNotFoundException;
 import com.example.monitor.management.domain.model.*;
-import com.example.monitor.management.domain.model.security.CustomUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -25,26 +25,9 @@ public class TableService {
         this.indicatorService = indicatorService;
     }
 
-    public PageDTO<DocTable> retrieveAll(String docId, PageRequest pageRequest) {
-        Page<DocTable> docTables = docTableRepository.findAllByDocumentId(pageRequest, docId);
-        docTables.forEach(d -> {
-            d.setIndicators(new HashSet<>(indicatorService.retrieveAll(d.getId(), pageRequest).getItems()));
-        });
-        return new PageDTO<>(docTables.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), docTables.getTotalElements());
-
-    }
-
-    public PageDTO<DocTable> retrieveUnHided(String docId, PageRequest pageRequest) {
-        Page<DocTable> docTables = docTableRepository.findAllUnHidedByDocumentId(pageRequest, docId);
-        docTables.forEach(d -> {
-            d.setIndicators(new HashSet<>(indicatorService.retrieveUnHided(d.getId(), pageRequest).getItems()));
-        });
-        return new PageDTO<>(docTables.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), docTables.getTotalElements());
-
-    }
 
     @Transactional
-    public Set<DocTable> createTable(CustomUserDetails customUserDetails, Document document, BodyDto createBodyDto) {
+    public Set<DocTable> createTable(UserDetails customUserDetails, Document document, BodyDto createBodyDto) {
         Set<DocTable> docTables = new HashSet<>();
         createBodyDto.getDocTableDto().forEach(d -> {
             docTables.add(createNewDocTale(customUserDetails, document, d));
@@ -52,23 +35,13 @@ public class TableService {
         return docTables;
     }
 
-    public Set<DocTable> update(CustomUserDetails customUserDetails, Document document, List<DocTableDto> updateTableDto) {
-        List<DocTable> docTables = getDocTables(document);
-        Map<String, DocTableDto> tableMap = convertDocTableToMap(updateTableDto);
+    public Set<DocTable> update(UserDetails customUserDetails, Document document, Set<DocTableDto> updateTableDto) {
+        Map<String, DocTableDto> dtoTableMap = convertDocTableToMap(updateTableDto);
         Set<DocTable> updatedDocTables = new HashSet<>();
-        docTables.forEach(d -> {
-            if (tableMap.containsKey(d.getId())) {
-                DocTableDto tableDto = tableMap.get(d.getId());
-                d.setName(tableDto.getName());
-                d.visible(tableDto.isHided());
-                d.setUpdatedBy(customUserDetails.getUserId());
-                updatedDocTables.add(d);
-                updateTableDto.remove(tableDto);
-                docTableRepository.save(d);
-                indicatorService.updateIndicators(customUserDetails, d, tableDto.getIndicators());
-            }
+        document.getDocTables().forEach(d -> {
+            x(dtoTableMap, d, customUserDetails, updatedDocTables, updateTableDto);
         });
-        omitDeletedTables(updatedDocTables, docTables);
+        omitDeletedTables(updatedDocTables, document.getDocTables());
         if (updateTableDto.size() > 0) {
             updateTableDto.forEach(i -> {
                 updatedDocTables.add(createNewDocTale(customUserDetails, document, i));
@@ -77,27 +50,31 @@ public class TableService {
         return updatedDocTables;
     }
 
-    private List<DocTable> getDocTables(Document document) {
-        List<DocTable> docTables = docTableRepository.findAllByDocumentId(document.getId());
-        if (docTables.isEmpty()) {
-            throw new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle());
+    private void x(Map<String, DocTableDto> dtoTableMap, DocTable d, UserDetails customUserDetails, Set<DocTable> updatedDocTables, Set<DocTableDto> updateTableDto) {
+        if (dtoTableMap.containsKey(d.getId())) {
+            DocTableDto tableDto = dtoTableMap.get(d.getId());
+            d.setName(tableDto.getName());
+            d.visible(tableDto.isHided());
+            d.setUpdatedBy(customUserDetails.getUsername());
+            updatedDocTables.add(d);
+            updateTableDto.remove(tableDto);
+            indicatorService.updateIndicators(customUserDetails, d, tableDto.getIndicators());
         }
-        return docTables;
     }
 
-    private void omitDeletedTables(Set<DocTable> updatedDocTables, List<DocTable> currentDocTables) {
+
+    private void omitDeletedTables(Set<DocTable> updatedDocTables, Set<DocTable> currentDocTables) {
         Set<String> updatedDocTablesIds = updatedDocTables.stream().map(BaseModel::getId).collect(Collectors.toSet());
         currentDocTables.parallelStream().filter(i -> !updatedDocTablesIds.contains((i.getId()))).forEach(docTableRepository::delete);
     }
 
-    private Map<String, DocTableDto> convertDocTableToMap(List<DocTableDto> updateTableDto) {
+    private Map<String, DocTableDto> convertDocTableToMap(Set<DocTableDto> updateTableDto) {
         return updateTableDto.stream().collect(Collectors.toMap(DocTableDto::getId, DocTableDto::getObject));
     }
 
-    private DocTable createNewDocTale(CustomUserDetails customUserDetails, Document document, DocTableDto docTable) {
+    private DocTable createNewDocTale(UserDetails customUserDetails, Document document, DocTableDto docTable) {
         DocTable newDocTable = new DocTable(UUID.randomUUID().toString(), docTable.getName(), document);
-        newDocTable.setCreatedBy(customUserDetails.getUserId());
-        docTableRepository.save(newDocTable);
+        newDocTable.setCreatedBy(customUserDetails.getUsername());
         indicatorService.create(customUserDetails, newDocTable, docTable.getIndicators());
         return newDocTable;
     }
