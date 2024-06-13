@@ -23,15 +23,4 @@ public class ResponseEntityUtil {
         return ResponseEntity.status(HttpStatus.OK).body(successfulRequestResponseEntity);
     }
 
-    public static ResponseEntity<Object> generateServiceUnAvailableResponseEntity(
-            ServiceUnavailableResponseEntity<?> serviceUnavailableResponseEntity
-    ) {
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(serviceUnavailableResponseEntity);
-    }
-
-    public static ResponseEntity<Object> generateBadRequestResponseEntity(
-            BadRequestResponseEntity<?> badRequestResponseEntity
-    ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(badRequestResponseEntity);
-    }
 }
