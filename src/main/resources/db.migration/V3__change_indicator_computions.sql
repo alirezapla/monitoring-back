@@ -7,3 +7,4 @@ create table computation
     indicator_id varchar(255),
     FOREIGN KEY (indicator_id) REFERENCES indicator(id)
 );
+create index computation_indicator_id_fk on computation (indicator_id);
