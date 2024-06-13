@@ -24,7 +24,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return ResponseEntity.status(status).body(this.body(ex.getMessage(), status));
     }
 
-    @ExceptionHandler(value = {InvalidClientPerspective.class, OrderDuplicatedException.class, BodyValidationException.class})
+    @ExceptionHandler(value = {ConstraintViolationException.class,InvalidClientPerspective.class, OrderDuplicatedException.class, BodyValidationException.class})
     protected ResponseEntity<Object> handleBadRequestException(Exception ex) {
         ex.printStackTrace();
         int status = HttpStatus.BAD_REQUEST.value();
