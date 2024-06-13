@@ -31,21 +31,6 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return ResponseEntity.status(status).body(this.body(ex.getMessage(), status));
     }
 
-    @ExceptionHandler(value = {ConstraintViolationException.class})
-    protected ResponseEntity<Object> handleCustomValidationBadRequestException(ConstraintViolationException c) {
-        Set<ConstraintViolation<?>> violations = c.getConstraintViolations();
-        String errorMessage = "";
-        if (!violations.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            violations.forEach(violation -> builder.append(" " + violation.getMessage()));
-            errorMessage = builder.toString();
-        } else {
-            errorMessage = "CCC";
-        }
-        int status = HttpStatus.BAD_REQUEST.value();
-        return ResponseEntity.status(status).body(this.body(errorMessage, status));
-    }
-
     @ExceptionHandler(value = {RecordNotFoundException.class})
     protected ResponseEntity<Object> handleNotFoundException(Exception ex) {
         ex.printStackTrace();
