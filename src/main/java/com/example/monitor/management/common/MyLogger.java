@@ -17,13 +17,13 @@ import java.util.Map;
 
 @Component
 public class MyLogger {
-    private final Logger logger;
+    private static Logger logger = LoggerFactory.getLogger(MyLogger.class);
 
     public MyLogger() {
-        this.logger = LoggerFactory.getLogger(this.getClass());
+
     }
 
-    public void doLog(LogLevel logLevel,AppLogEvent event, Object payload) {
+    public static void doLog(LogLevel logLevel,AppLogEvent event, Object payload) {
         String message = new HashMap<String, Object>() {{
             put("Event", event);
             put("Body", payload);
