@@ -7,6 +7,7 @@ import lombok.Setter;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,10 +23,15 @@ public class DocTableDto {
 
     @JsonProperty("is_hided")
     private boolean isHided;
-    @JsonProperty("is_deleted")
-    private boolean isDeleted;
+
     public DocTableDto getObject() {
         return this;
+    }
+    public String getId() {
+        if (this.id == null) {
+            return UUID.randomUUID().toString();
+        }
+        return this.id;
     }
 
 

@@ -1,8 +1,11 @@
 package com.example.monitor.management.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
+
 import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -23,11 +26,13 @@ public class DocTable extends BaseModel<DocTable> {
     @ManyToOne
     @JoinColumn(name = "document_id", nullable = false)
     @JsonIgnoreProperties("docTables")
+    @JsonBackReference
     private Document document;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "doc_table_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @JsonIgnoreProperties("docTable")
+    @JsonManagedReference
     private Set<Indicator> indicators;
 
 
@@ -49,4 +54,6 @@ public class DocTable extends BaseModel<DocTable> {
     public void visible(boolean isHide) {
         this.isHided = isHide;
     }
+
+
 }
