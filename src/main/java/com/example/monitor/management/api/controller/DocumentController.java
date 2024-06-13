@@ -58,7 +58,7 @@ public class DocumentController {
     public ResponseEntity<Object> getAllDocuments(
             @RequestParam(required = true) int page,
             @RequestParam(required = true) int perPage,
-            @RequestParam(required = false) @ValuesAllowed(values = {"name", "id"}) String orderBy,
+            @RequestParam(required = false) @ValuesAllowed(values = {"name", "id","createdDate","updatedDate"}) String orderBy,
             @RequestParam(required = false) String searchTerm) {
         MyLogger.doLog(LogLevel.INFO, AppLogEvent.FETCH_REQUEST_RECEIVED, "");
         return responseHandler(
@@ -89,7 +89,7 @@ public class DocumentController {
     private PageRequest pageRequest(int page, int perPage, String orderBy) {
         PaginationDTO paginationDTO = new PaginationDTO(page, perPage);
         if (!orderBy.isEmpty()) {
-            return PageRequest.of(paginationDTO.getPage() - 1, paginationDTO.getPerPage(), Sort.by(orderBy));
+            return PageRequest.of(paginationDTO.getPage() - 1, paginationDTO.getPerPage(), Sort.by(orderBy).descending());
         }
         return PageRequest.of(paginationDTO.getPage() - 1, paginationDTO.getPerPage());
     }
