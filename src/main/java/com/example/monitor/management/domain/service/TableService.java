@@ -1,13 +1,8 @@
 package com.example.monitor.management.domain.service;
 
-import com.example.monitor.management.api.utils.httputil.pagination.PageDTO;
 import com.example.monitor.management.common.Dto.BodyDto;
 import com.example.monitor.management.common.Dto.DocTableDto;
-import com.example.monitor.management.common.exceptions.ExceptionMessages;
-import com.example.monitor.management.common.exceptions.RecordNotFoundException;
 import com.example.monitor.management.domain.model.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +34,15 @@ public class TableService {
         Map<String, DocTableDto> dtoTableMap = convertDocTableToMap(updateTableDto);
         Set<DocTable> updatedDocTables = new HashSet<>();
         document.getDocTables().forEach(d -> {
-            x(dtoTableMap, d, customUserDetails, updatedDocTables, updateTableDto);
+            if (dtoTableMap.containsKey(d.getId())) {
+                DocTableDto tableDto = dtoTableMap.get(d.getId());
+                d.setName(tableDto.getName());
+                d.visible(tableDto.isHided());
+                d.setUpdatedBy(customUserDetails.getUsername());
+                updatedDocTables.add(d);
+                updateTableDto.remove(tableDto);
+                indicatorService.updateIndicators(customUserDetails, d, tableDto.getIndicators());
+            }
         });
         omitDeletedTables(updatedDocTables, document.getDocTables());
         if (updateTableDto.size() > 0) {
@@ -48,18 +51,6 @@ public class TableService {
             });
         }
         return updatedDocTables;
-    }
-
-    private void x(Map<String, DocTableDto> dtoTableMap, DocTable d, UserDetails customUserDetails, Set<DocTable> updatedDocTables, Set<DocTableDto> updateTableDto) {
-        if (dtoTableMap.containsKey(d.getId())) {
-            DocTableDto tableDto = dtoTableMap.get(d.getId());
-            d.setName(tableDto.getName());
-            d.visible(tableDto.isHided());
-            d.setUpdatedBy(customUserDetails.getUsername());
-            updatedDocTables.add(d);
-            updateTableDto.remove(tableDto);
-            indicatorService.updateIndicators(customUserDetails, d, tableDto.getIndicators());
-        }
     }
 
 

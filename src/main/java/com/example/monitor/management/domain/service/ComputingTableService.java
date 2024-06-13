@@ -1,6 +1,5 @@
 package com.example.monitor.management.domain.service;
 
-import com.example.monitor.management.api.utils.httputil.pagination.PageDTO;
 import com.example.monitor.management.common.Dto.BodyDto;
 import com.example.monitor.management.common.Dto.ComputingTableItemsDto;
 import com.example.monitor.management.common.exceptions.ExceptionMessages;
@@ -8,8 +7,6 @@ import com.example.monitor.management.common.exceptions.RecordNotFoundException;
 import com.example.monitor.management.domain.model.ComputingTableItems;
 import com.example.monitor.management.domain.model.ComputingTableItemsRepository;
 import com.example.monitor.management.domain.model.Document;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;

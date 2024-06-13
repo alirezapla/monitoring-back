@@ -10,15 +10,7 @@ import org.springframework.data.repository.history.RevisionRepository;
 import java.util.Optional;
 
 public interface DocumentRepository extends RevisionRepository<Document, String, Long>, JpaRepository<Document, String> {
-//    @EntityGraph(
-//            type = EntityGraph.EntityGraphType.FETCH,
-//            attributePaths = {
-//                    "computingTableItems",
-//                    "docTables",
-//                    "docTables.indicators",
-//                    "docTables.indicators.computations"
-//            }
-//    )
+
     @Query(
             value = "SELECT d From Document d WHERE (:searchTerm IS NULL OR LOWER(d.name) LIKE LOWER(CONCAT('%',:searchTerm,'%'))) ")
     Page<Document> findAllDocument(Pageable pageable,String searchTerm);

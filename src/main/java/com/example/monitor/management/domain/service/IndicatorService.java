@@ -1,14 +1,10 @@
 package com.example.monitor.management.domain.service;
 
-import com.example.monitor.management.api.utils.httputil.pagination.PageDTO;
 import com.example.monitor.management.common.Dto.IndicatorComputationDto;
 import com.example.monitor.management.common.Dto.IndicatorDto;
-import com.example.monitor.management.common.exceptions.ExceptionMessages;
 import com.example.monitor.management.common.exceptions.OrderDuplicatedException;
-import com.example.monitor.management.common.exceptions.RecordNotFoundException;
 import com.example.monitor.management.domain.model.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +22,6 @@ public class IndicatorService {
         this.computationRepository = computationRepository;
     }
 
-    public PageDTO<Indicator> retrieveAll(String docTableId, PageRequest pageRequest) {
-        Page<Indicator> indicators = indicatorRepository.findAllByDocTableId(pageRequest, docTableId);
-        return new PageDTO<>(indicators.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), indicators.getTotalElements());
-    }
-
-    public PageDTO<Indicator> retrieveUnHided(String docTableId, PageRequest pageRequest) {
-        Page<Indicator> indicators = indicatorRepository.findAllUnHidedByDocTableId(pageRequest, docTableId);
-        return new PageDTO<>(indicators.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), indicators.getTotalElements());
-    }
 
     @Transactional
     public void create(UserDetails customUserDetails, DocTable docTable, List<IndicatorDto> indicators) {
