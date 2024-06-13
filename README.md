@@ -1,5 +1,5 @@
 
-![alt text](https://github.com/alirezapla/monitoring-back/blob/main/files/erd1.png)
+![alt text](https://github.com/alirezapla/monitoring-back/blob/new-changes/files/erd1.png)
 
 `java version : 8`
 
