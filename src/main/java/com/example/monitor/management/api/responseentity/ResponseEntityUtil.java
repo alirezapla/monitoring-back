@@ -19,6 +19,7 @@ public class ResponseEntityUtil {
     public static ResponseEntity<Object> generateSuccessfulRequestResponseEntity(
             SuccessfulRequestResponseEntity<?> successfulRequestResponseEntity, AppLogEvent logEvent
     ) {
+        MyLogger.doLog(LogLevel.INFO,logEvent,"");
         return ResponseEntity.status(HttpStatus.OK).body(successfulRequestResponseEntity);
     }
 
