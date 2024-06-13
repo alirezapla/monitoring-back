@@ -33,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public UserDetailsService users() {
         UserDetails user1 = User.builder()
                 .username("user1")
-                .password("pass") //pass
+                .password("$2a$12$svqpC4mrnl0u1ET6u9A9feNlvsXip7mfv75Jg/sL.EC1zCq5FLWGe") //pass
                 .roles("ADMIN")
                 .build();
         UserDetails user2 = User.builder()
