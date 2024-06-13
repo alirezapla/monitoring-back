@@ -5,14 +5,10 @@ public enum ExceptionMessages {
     BAD_REQUEST(1, "Bad request!"),
     USER_CREDENTIAL_NOT_FOUND(2, "UserCredential for requested username not found."),
     PASSWORD_IS_NOT_VALID(3, "Entered password is not valid."),
-    EMPTY_FILE(4, "Empty file!"),
-    RECORD_NOT_FOUND(5, "Record not found."),
-    TRANSACTION_NOT_FOUND(6, "Transaction not found."),
-    ILLEGAL_CONTENT_EXCEPTION(7, "Illegal content!"),
-    CURRENT_PASSWORD_IS_EQUAL_TO_NEW_PASSWORD(8, "Current password is equal to new password!"),
-    REGISTRY_OFFICE_API_EXCEPTION(9, "Registry office api threw an exception! "),
-    ILLEGAL_STATE(10, "Illegal state!"),
-    SERVICE_UNAVAILABLE(11, "Service Unavailable");
+    RECORD_NOT_FOUND(4, "Record not found."),
+    CURRENT_PASSWORD_IS_EQUAL_TO_NEW_PASSWORD(5, "Current password is equal to new password!"),
+    ILLEGAL_STATE(6, "Illegal state!"),
+    SERVICE_UNAVAILABLE(7, "Service Unavailable");
 
     private int index;
     private String title;
