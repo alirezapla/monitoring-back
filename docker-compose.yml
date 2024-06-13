@@ -1,5 +1,14 @@
 version: '3.8'
 services:
+  app:
+    image: 'spring-postgres:latest'
+    build:
+      context: .
+    container_name: app
+    depends_on:
+      - db
+    ports:
+      - "8877:8877"
   postgres:
     container_name: postgresqlDb
     image: postgres:14.0-alpine
@@ -12,3 +21,4 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
+    
