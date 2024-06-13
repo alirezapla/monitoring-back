@@ -1,16 +1,14 @@
 package com.example.monitor.management.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
-import java.util.HashSet;
-import java.util.UUID;
+
 
 
 @Setter
@@ -19,7 +17,6 @@ import java.util.UUID;
 @Table(name = "computing_table_items")
 @Audited
 @EntityListeners(AuditingEntityListener.class)
-@EqualsAndHashCode(exclude = "document", callSuper = false)
 public class ComputingTableItems extends BaseModel<ComputingTableItems> {
 
     @Column(name = "description")
@@ -30,7 +27,7 @@ public class ComputingTableItems extends BaseModel<ComputingTableItems> {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id", nullable = false)
-    @JsonIgnoreProperties("computingTableItems")
+    @JsonBackReference
     private Document document;
 
 

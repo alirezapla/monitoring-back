@@ -27,23 +27,11 @@ public class ComputingTableService {
         Set<ComputingTableItems> computingTableItems = new HashSet<>();
         bodyDto.getComputingTableItems().forEach(i -> {
             computingTableItems.add(new ComputingTableItems(
-                    UUID.randomUUID().toString(), i.getCommand(), i.getDescription(), document));
+                    UUID.randomUUID().toString(), i.getDescription(),i.getCommand(), document));
         });
-        computingTableItemsRepository.saveAll(computingTableItems);
         return computingTableItems;
     }
 
-    public PageDTO<ComputingTableItems> retrieveAll(String docId, PageRequest pageRequest) {
-        Page<ComputingTableItems> computingTableItems = computingTableItemsRepository.findAllByDocumentId(pageRequest, docId);
-        return new PageDTO<>(computingTableItems.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), computingTableItems.getTotalElements());
-
-    }
-
-    public PageDTO<ComputingTableItems> retrieveUnHided(String docId, PageRequest pageRequest) {
-        Page<ComputingTableItems> computingTableItems = computingTableItemsRepository.findAllUnHidedByDocumentId(pageRequest, docId);
-        return new PageDTO<>(computingTableItems.getContent(), pageRequest.getPageNumber(), pageRequest.getPageSize(), computingTableItems.getTotalElements());
-
-    }
 
     public Set<ComputingTableItems> update(Document document, BodyDto bodyDto) {
         Map<String, ComputingTableItemsDto> itemsMap = bodyDto.getComputingTableItems().stream()
@@ -61,7 +49,6 @@ public class ComputingTableService {
                 i.visible(computingTableItemsDto.isHided());
                 updatedComputingTableItems.add(i);
                 bodyDto.getComputingTableItems().remove(computingTableItemsDto);
-                computingTableItemsRepository.save(i);
             }
         });
         omitDeletedComputingItems(updatedComputingTableItems, computingTable);
@@ -69,10 +56,9 @@ public class ComputingTableService {
         if (bodyDto.getComputingTableItems().size() > 0) {
             bodyDto.getComputingTableItems().forEach(i -> {
                 document.addComputingItem(new ComputingTableItems(
-                        UUID.randomUUID().toString(), i.getCommand(), i.getDescription(), document));
+                        UUID.randomUUID().toString(), i.getDescription(),i.getCommand(),  document));
             });
         }
-        computingTableItemsRepository.saveAll(updatedComputingTableItems);
         return updatedComputingTableItems;
 
     }
