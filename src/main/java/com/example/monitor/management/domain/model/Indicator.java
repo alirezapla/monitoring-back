@@ -7,11 +7,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -19,7 +24,6 @@ import java.util.Set;
 @Table(name = "indicator")
 @Audited
 @EntityListeners(AuditingEntityListener.class)
-@EqualsAndHashCode(exclude = "docTable", callSuper = false)
 public class Indicator extends BaseModel<Indicator> {
     @Column(name = "name")
     private String name;
@@ -64,13 +68,13 @@ public class Indicator extends BaseModel<Indicator> {
     @JsonIgnoreProperties("docTable")
     private DocTable docTable;
 
-    @Convert(converter = JsonConvertor.class)
-    @Column(columnDefinition = "jsonb")
-    @ColumnTransformer(write = "?::jsonb")
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "indicator", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("indicator")
     @JsonProperty("computations")
-    private Set<Computation> computation;
-
-
+    @NotAudited
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<Computation> computations;
 
     public Indicator() {
     }
@@ -85,7 +89,6 @@ public class Indicator extends BaseModel<Indicator> {
                      DataType dataType,
                      IndicatorType indicatorType,
                      UnitType unitType,
-                     Set<Computation> computation,
                      DocTable doctable
     ) {
         super(id);
@@ -98,12 +101,22 @@ public class Indicator extends BaseModel<Indicator> {
         this.dataType = dataType;
         this.indicatorType = indicatorType;
         this.unitType = unitType;
-        this.computation = computation;
+        this.computations = new HashSet<>();
         this.docTable = doctable;
 
+    }
+
+    public Indicator insertComputations(Set<Computation> computations) {
+        this.computations = computations;
+        return this;
+    }
+
+    public void addComputation(Computation computation) {
+        this.computations.add(computation);
     }
 
     public void visible(boolean isHide) {
         this.isHided = isHide;
     }
+
 }

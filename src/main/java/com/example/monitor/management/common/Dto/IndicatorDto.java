@@ -18,6 +18,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 
 @Getter
@@ -58,19 +59,25 @@ public class IndicatorDto {
 
     @JsonProperty("is_hided")
     private boolean isHided;
-    @JsonProperty("is_deleted")
-    private boolean isDeleted;
+
 
 
     //    @Valid
     @Size(min = 1, message = "Input computation set cannot be empty.")
     @NotNull(message = "computations must not be null")
     @JsonProperty("computations")
-    private Set<Computation> computation;
+    private Set<IndicatorComputationDto> computations;
 
 
     public IndicatorDto getObject() {
         return this;
+    }
+
+    public String getId() {
+        if (this.id == null || this.id.equals("")) {
+            return UUID.randomUUID().toString();
+        }
+        return this.id;
     }
 
 }
