@@ -1,8 +1,5 @@
 package com.example.monitor.management.infrastructure.config;
 
-import com.example.monitor.management.domain.model.security.UserAuthorityType;
-import com.example.monitor.management.domain.service.user.CustomUserDetailsService;
-import com.example.monitor.management.infrastructure.security.filter.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,20 +7,20 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtFilter jwtFilter;
-    private final CustomUserDetailsService customUserDetailsService;
 
-    public SecurityConfig(JwtFilter jwtFilter, CustomUserDetailsService customUserDetailsService) {
-        this.jwtFilter = jwtFilter;
-        this.customUserDetailsService = customUserDetailsService;
+    public SecurityConfig() {
     }
 
     @Bean
@@ -33,9 +30,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    @Override
-    public UserDetailsService userDetailsService() {
-        return customUserDetailsService;
+    public UserDetailsService users() {
+        UserDetails user1 = User.builder()
+                .username("user1")
+                .password("pass") //pass
+                .roles("ADMIN")
+                .build();
+        UserDetails user2 = User.builder()
+                .username("user2")
+                .password("$2a$12$aoPYjva/xq73w0hSMZwg5OMUWLt3ylsfq1OnKXBXxgAI.eO1mXX.e") //secret
+                .roles("ADMIN")
+                .build();
+        return new InMemoryUserDetailsManager(user1, user2);
     }
 
     @Bean
@@ -45,20 +51,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         http
+                .httpBasic(withDefaults())
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .mvcMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .mvcMatchers(HttpMethod.GET, "/documents").permitAll()
                 .mvcMatchers(HttpMethod.GET, "/documents/{id}").permitAll()
-                .mvcMatchers(HttpMethod.PUT, "/documents/{id}").hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
-                .mvcMatchers(HttpMethod.DELETE, "/documents/{id}").hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
-                .mvcMatchers(HttpMethod.POST, "/documents").hasAnyAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
+                .mvcMatchers(HttpMethod.PUT, "/documents/{id}").hasAnyAuthority("ROLE_ADMIN")
+                .mvcMatchers(HttpMethod.DELETE, "/documents/{id}").hasAnyAuthority("ROLE_ADMIN")
+                .mvcMatchers(HttpMethod.POST, "/documents").hasAnyAuthority("ROLE_ADMIN")
                 .anyRequest()
-                .hasAuthority(UserAuthorityType.AUTHORITY_ADMIN.getTitle())
+                .hasAuthority("ROLE_ADMIN")
                 .and()
                 .exceptionHandling()
                 .and()
