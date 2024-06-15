@@ -9,7 +9,7 @@ services:
       - db
     ports:
       - "8877:8877"
-  postgres:
+  db:
     container_name: postgresqlDb
     image: postgres:14.0-alpine
     restart: on-failure
