@@ -20,14 +20,11 @@ public class TableService {
         this.indicatorService = indicatorService;
     }
 
-
     @Transactional
     public Set<DocTable> createTable(UserDetails customUserDetails, Document document, BodyDto createBodyDto) {
-        Set<DocTable> docTables = new HashSet<>();
-        createBodyDto.getDocTableDto().forEach(d -> {
-            docTables.add(createNewDocTale(customUserDetails, document, d));
-        });
-        return docTables;
+    return createBodyDto.getDocTableDto().stream()
+            .map(d -> createNewDocTale(customUserDetails, document, d))
+            .collect(Collectors.toSet());
     }
 
     public Set<DocTable> update(UserDetails customUserDetails, Document document, Set<DocTableDto> updateTableDto) {
