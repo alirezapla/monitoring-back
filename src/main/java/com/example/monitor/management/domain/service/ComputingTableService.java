@@ -33,21 +33,31 @@ public class ComputingTableService {
     public Set<ComputingTableItems> update(Document document, BodyDto bodyDto) {
         Map<String, ComputingTableItemsDto> itemsMap = bodyDto.getComputingTableItems().stream()
                 .collect(Collectors.toMap(ComputingTableItemsDto::getId, ComputingTableItemsDto::getObject));
-        List<ComputingTableItems> computingTable = computingTableItemsRepository.findByDocumentId(document.getId());
-        if (computingTable.isEmpty()) {
+        List<ComputingTableItems> existingItems = computingTableItemsRepository.findByDocumentId(document.getId());
+        if (existingItems.isEmpty()) {
             throw new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle());
         }
-        Set<ComputingTableItems> updatedComputingTableItems = new HashSet<>();
-        computingTable.forEach(i -> {
-            if (itemsMap.containsKey(i.getId())) {
-                ComputingTableItemsDto computingTableItemsDto = itemsMap.get(i.getId());
-                i.setDescription(computingTableItemsDto.getDescription());
-                i.setCommand(computingTableItemsDto.getCommand());
-                i.visible(computingTableItemsDto.isHided());
-                updatedComputingTableItems.add(i);
-                bodyDto.getComputingTableItems().remove(computingTableItemsDto);
-            }
-        });
+        Set<ComputingTableItems> updatedItems = existingItems.stream()
+            .filter(item -> itemsMap.containsKey(item.getId()))
+            .peek(item -> {
+                ComputingTableItemsDto dto = itemsMap.get(item.getId());
+                item.setDescription(dto.getDescription());
+                item.setCommand(dto.getCommand());
+                item.setVisible(!dto.isHided()); 
+                bodyDto.getComputingTableItems().remove(dto);        
+            })
+            .collect(Collectors.toSet());
+        // Set<ComputingTableItems> updatedComputingTableItems = new HashSet<>();
+        // computingTable.forEach(i -> {
+        //     if (itemsMap.containsKey(i.getId())) {
+        //         ComputingTableItemsDto computingTableItemsDto = itemsMap.get(i.getId());
+        //         i.setDescription(computingTableItemsDto.getDescription());
+        //         i.setCommand(computingTableItemsDto.getCommand());
+        //         i.visible(computingTableItemsDto.isHided());
+        //         updatedComputingTableItems.add(i);
+        //         bodyDto.getComputingTableItems().remove(computingTableItemsDto);
+        //     }
+        // });
         omitDeletedComputingItems(updatedComputingTableItems, computingTable);
         document.setComputingTableItems(updatedComputingTableItems);
         if (bodyDto.getComputingTableItems().size() > 0) {
