@@ -42,8 +42,8 @@ public class TableService {
             }
         });
         omitDeletedTables(updatedDocTables, document.getDocTables());
-        if (updateTableDto.size() > 0) {
-            updateTableDto.forEach(i -> {
+        
+        dtoTableMap.values().forEach(i -> {
                 updatedDocTables.add(createNewDocTale(customUserDetails, document, i));
             });
         }
