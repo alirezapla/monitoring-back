@@ -45,19 +45,18 @@ public class IndicatorService {
         });
         omitDeletedIndicators(updatedIndicators, docTable.getIndicators());
         docTable.setIndicators(updatedIndicators);
-        if (updateIndicatorDto.size() > 0) {
-            updateIndicatorDto.forEach(i -> {
-                docTable.addIndicator(createIndicator(docTable, i));
-            });
-        }
+                
+        indicatorsMap.values().forEach(indicatorDto -> {
+            docTable.addIndicator(createIndicator(docTable, indicatorDto));
+        });
         orderValidator(docTable.getIndicators());
     }
 
 
     private void omitDeletedIndicators(Set<Indicator> updatedIndicators, Set<Indicator> currentIndicators) {
         Set<String> updatedIndicatorIds = updatedIndicators.stream().map(BaseModel::getId).collect(Collectors.toSet());
-        currentIndicators.parallelStream()
-                .filter(i -> !updatedIndicatorIds.contains((i.getId())))
+        currentIndicators.stream()
+                .filter(indicator -> !updatedIndicatorIds.contains(indicator.getId()))
                 .forEach(indicatorRepository::delete);
     }
 
@@ -74,16 +73,13 @@ public class IndicatorService {
                 UnitType.valueOf(indicatorDto.getUnitType()),
                 docTable
         );
-        return indicator.insertComputations(
-                mapComputationsDtoToComputations(indicator, indicatorDto.getComputations()));
+        return indicator.insertComputations(mapComputationsDtoToComputations(indicator, indicatorDto.getComputations()));
     }
 
-    private Set<Computation> mapComputationsDtoToComputations(Indicator indicator, Set<IndicatorComputationDto> indicatorComputationDto) {
-        Set<Computation> computations = new HashSet<>();
-        indicatorComputationDto.forEach(i -> {
-            computations.add(new Computation(i.getLabel(), i.getDescription(), indicator));
-        });
-        return computations;
+    private Set<Computation> mapComputationsDtoToComputations(Indicator indicator, Set<IndicatorComputationDto> computationDtos) {
+        return computationDtos.stream()
+                .map(dto -> new Computation(dto.getLabel(), dto.getDescription(), indicator))
+                .collect(Collectors.toSet());
     }
 
     private Indicator updateIndicator(UserDetails customUserDetails, Indicator indicator, IndicatorDto updateIndicatorDto) {
@@ -98,39 +94,39 @@ public class IndicatorService {
         indicator.setDataType(DataType.valueOf(updateIndicatorDto.getDataType()));
         indicator.setUnitType(UnitType.valueOf(updateIndicatorDto.getUnitType()));
         indicator.visible(updateIndicatorDto.isHided());
+        
         updateIndicatorComputations(indicator, updateIndicatorDto.getComputations());
-
         return indicator;
 
     }
 
     private void updateIndicatorComputations(Indicator indicator, Set<IndicatorComputationDto> indicatorComputationsDto) {
-        Set<Computation> updatedComputations = new HashSet<>();
-        Map<String, IndicatorComputationDto> indicatorComputationDtoMap = indicatorComputationsDto.stream()
-                .collect(Collectors.toMap(IndicatorComputationDto::getId, IndicatorComputationDto::getObject));
+        Map<String, IndicatorComputationDto> computationDtoMap = computationDtos.stream()
+                .collect(Collectors.toMap(IndicatorComputationDto::getId, dto -> dto));
 
-        indicator.getComputations().forEach(i -> {
-            IndicatorComputationDto indicatorComputation = indicatorComputationDtoMap.get(i.getId());
-            if (indicatorComputationDtoMap.containsKey(i.getId())) {
-                i.setDescription(indicatorComputation.getDescription());
-                i.setLabel(indicatorComputation.getLabel());
-                updatedComputations.add(i);
-                indicatorComputationsDto.remove(indicatorComputationDtoMap.get(i.getId()));
+        Set<Computation> updatedComputations = new HashSet<>();
+
+        indicator.getComputations().forEach(computation -> {
+            if (computationDtoMap.containsKey(computation.getId())) {
+                IndicatorComputationDto dto = computationDtoMap.get(computation.getId());
+                computation.setDescription(dto.getDescription());
+                computation.setLabel(dto.getLabel());
+                updatedComputations.add(computation);
+                computationDtoMap.remove(computation.getId());
             }
         });
+        
         omitDeletedComputation(updatedComputations, indicator.getComputations());
         indicator.setComputations(updatedComputations);
-        if (indicatorComputationsDto.size() > 0) {
-            indicatorComputationsDto.forEach(i -> {
-                indicator.addComputation(new Computation(i.getLabel(), i.getDescription(),indicator));
-            });
-        }
+        computationDtoMap.values().forEach(dto -> {
+            indicator.addComputation(new Computation(dto.getLabel(), dto.getDescription(), indicator));
+        });
     }
 
     private void omitDeletedComputation(Set<Computation> updatedComputations, Set<Computation> computations) {
         Set<String> updatedComputationIds = updatedComputations.stream().map(Computation::getId).collect(Collectors.toSet());
-        computations.parallelStream()
-                .filter(i -> !updatedComputationIds.contains((i.getId())))
+        computations.stream()
+                .filter(computation -> !updatedComputationIds.contains(computation.getId()))
                 .forEach(computationRepository::delete);
     }
 
@@ -142,6 +138,7 @@ public class IndicatorService {
     private void orderValidator(Set<Indicator> indicators) {
         Map<Integer, Long> orderCont = indicators.stream()
                 .collect(Collectors.groupingBy(Indicator::getOrder, Collectors.counting()));
+        
         orderCont.forEach((key, value) -> {
             if (value > 1) {
                 throw new OrderDuplicatedException("Orders must be unique");
