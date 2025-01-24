@@ -34,73 +34,58 @@ public class DocumentService {
         this.tableService = tableService;
     }
 
-    public Object retrieveAll(PageRequest pageRequest, String searchTerm) {
-        MyLogger.doLog(LogLevel.INFO, AppLogEvent.RETRIEVE_ALL_DOCUMENTS_SERVICE_STARTED, "");
-        Set<DocumentNameAndIdDto> documents = new HashSet<>();
-        Page<Document> pageableDocuments;
-        pageableDocuments = documentRepository.findAllDocument(pageRequest, searchTerm);
-        pageableDocuments.forEach(document -> {
-            documents.add(new DocumentNameAndIdDto(document));
-        });
-        MyLogger.doLog(LogLevel.INFO, AppLogEvent.RETRIEVE_ALL_DOCUMENTS_SERVICE_FINISHED, "");
+    public Set<DocumentNameAndIdDto> retrieveAll(PageRequest pageRequest, String searchTerm) {
+        logEvent(LogLevel.INFO, AppLogEvent.RETRIEVE_ALL_DOCUMENTS_SERVICE_STARTED, "");
+        Page<Document> pageableDocuments = documentRepository.findAllDocument(pageRequest, searchTerm);
+        Set<DocumentNameAndIdDto> documents = pageableDocuments.stream()
+                .map(DocumentNameAndIdDto::new)
+                .collect(Collectors.toSet());
+        logEvent(LogLevel.INFO, AppLogEvent.RETRIEVE_ALL_DOCUMENTS_SERVICE_FINISHED, "");
         return documents;
     }
 
     public Document retrieve(String docId, String clientPerspective) {
-        MyLogger.doLog(LogLevel.INFO, AppLogEvent.RETRIEVE_DOCUMENT_SERVICE_STARTED, docId);
-        if (Objects.equals(clientPerspective, "View")) {
-            return getUnhidedDocument(docId);
-        } else if (Objects.equals(clientPerspective, "Edit")) {
-            return getDocument(docId);
+        logEvent(LogLevel.INFO, AppLogEvent.RETRIEVE_DOCUMENT_SERVICE_STARTED, docId);
+        switch (clientPerspective) {
+            case "View":
+                return getUnhidedDocument(docId);
+            case "Edit":
+                return getDocument(docId);
+            default:
+                throw new InvalidClientPerspective("Client perspectives must be `View` or `Edit`");
         }
-        throw new InvalidClientPerspective("client perspectives are `View` or `Edit`");
     }
-
-
+    
     @Transactional
     public Document create(UserDetails customUserDetails, BodyDto createBodyDto) {
-        MyLogger.doLog(LogLevel.INFO, AppLogEvent.CREATE_DOCUMENT_SERVICE_STARTED, "");
+        logEvent(LogLevel.INFO, AppLogEvent.CREATE_DOCUMENT_SERVICE_STARTED, "");
+
         Document document = new Document(UUID.randomUUID().toString(),
                 createBodyDto.getName(),
                 createBodyDto.getDescription());
-        Set<ComputingTableItems> computingTableItems = computingTableService.create(document, createBodyDto);
-        Set<DocTable> docTables = tableService.createTable(customUserDetails, document, createBodyDto);
-        document.setDocTables(docTables);
-        document.setComputingTableItems(computingTableItems);
+        document.setDocTables(tableService.createTable(customUserDetails, document, createBodyDto));
+        document.setComputingTableItems(computingTableService.create(document, createBodyDto));
         document.setCreatedBy(customUserDetails.getUsername());
         documentRepository.save(document);
-        MyLogger.doLog(LogLevel.INFO, AppLogEvent.CREATE_DOCUMENT_SERVICE_FINISHED, document.getId());
-        return document;
 
+        logEvent(LogLevel.INFO, AppLogEvent.CREATE_DOCUMENT_SERVICE_FINISHED, document.getId());
+        return document;
     }
 
-    public Object update(UserDetails customUserDetails, String docId, BodyDto bodyDto) {
-        MyLogger.doLog(LogLevel.INFO, AppLogEvent.UPDATE_DOCUMENT_SERVICE_STARTED, docId);
+    @Transactional
+    public DocumentResponseDto update(UserDetails customUserDetails, String docId, BodyDto bodyDto) {
+        logEvent(LogLevel.INFO, AppLogEvent.UPDATE_DOCUMENT_SERVICE_STARTED, docId);
         Document document = getDocument(docId);
+
         document.setDescription(bodyDto.getDescription());
         document.setHided(bodyDto.isHided());
-        Set<DocTable> docTable = tableService.update(customUserDetails, document, bodyDto.getDocTableDto());
-        document.setDocTables(docTable);
-        Set<ComputingTableItems> computingTable = computingTableService.update(document, bodyDto);
-        document.setComputingTableItems(computingTable);
+        document.setDocTables(tableService.update(customUserDetails, document, bodyDto.getDocTableDto()));
+        document.setComputingTableItems(computingTableService.update(document, bodyDto));
         document.setUpdatedBy(customUserDetails.getUsername());
         documentRepository.save(document);
-        MyLogger.doLog(LogLevel.INFO, AppLogEvent.UPDATE_DOCUMENT_SERVICE_FINISHED, document.getId());
-        if (bodyDto.isHided()) {
-            return null;
-        }
-        return new DocumentResponseDto(document);
-    }
 
-
-    private Document getDocument(String docId) {
-        return documentRepository.find(docId).orElseThrow(
-                () -> new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle()));
-    }
-
-    private Document getUnhidedDocument(String docId) {
-        return documentRepository.findIsNotHided(docId).orElseThrow(
-                () -> new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle()));
+        logEvent(LogLevel.INFO, AppLogEvent.UPDATE_DOCUMENT_SERVICE_FINISHED, document.getId());
+        return bodyDto.isHided() ? null : new DocumentResponseDto(document);
     }
 
     @Transactional
@@ -109,5 +94,19 @@ public class DocumentService {
         documentRepository.deleteById(docId);
         MyLogger.doLog(LogLevel.INFO, AppLogEvent.REMOVE_DOCUMENT_SERVICE_FINISHED, docId);
         return "done";
+    }
+
+    private Document getDocument(String docId) {
+        return documentRepository.find(docId)
+                .orElseThrow(() -> new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle()));
+    }
+
+    private Document getUnhidedDocument(String docId) {
+        return documentRepository.findIsNotHided(docId)
+                .orElseThrow(() -> new RecordNotFoundException(ExceptionMessages.RECORD_NOT_FOUND.getTitle()));
+    }
+    
+    private void logEvent(LogLevel level, AppLogEvent event, String message) {
+        MyLogger.doLog(level, event, message);
     }
 }
