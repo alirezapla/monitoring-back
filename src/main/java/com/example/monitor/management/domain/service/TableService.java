@@ -53,7 +53,7 @@ public class TableService {
 
     private void omitDeletedTables(Set<DocTable> updatedDocTables, Set<DocTable> currentDocTables) {
         Set<String> updatedDocTablesIds = updatedDocTables.stream().map(BaseModel::getId).collect(Collectors.toSet());
-        currentDocTables.parallelStream().filter(i -> !updatedDocTablesIds.contains((i.getId()))).forEach(docTableRepository::delete);
+        currentDocTables.stream().filter(i -> !updatedDocTablesIds.contains((i.getId()))).forEach(docTableRepository::delete);
     }
 
     private Map<String, DocTableDto> convertDocTableToMap(Set<DocTableDto> updateTableDto) {
